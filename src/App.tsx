@@ -18,7 +18,7 @@ import {
 const EVENT_DATE = new Date('2026-05-23T20:30:00');
 const RSVP_PHONE = '3205708928';
 const RSVP_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLSc7GEz6xJi9aflSejTHxACtdCNa9JxXE9gQSs4wGoJPI7iwUg/viewform?usp=header';
-const MUSIC_URL = 'https://lh3.googleusercontent.com/d/1aDRgTgniHW6ePa8YjASHJeE8HMAegEBn'; // Elegant placeholder
+const MUSIC_URL = 'https://drive.google.com/uc?export=download&id=1aDRgTgniHW6ePa8YjASHJeE8HMAegEBn'; // Elegant placeholder
 
 // --- Components ---
 
@@ -178,7 +178,7 @@ export default function App() {
                 transition={{ delay: 0.5 }}
                 className="absolute -bottom-12 left-0 w-full text-center text-gray-400 uppercase tracking-[0.3em] text-xs"
               >
-                Una invitación especial...
+                Una invitación especial mis 15 Años
               </motion.p>
             </div>
           </motion.div>
