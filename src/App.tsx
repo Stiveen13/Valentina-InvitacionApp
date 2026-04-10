@@ -16,9 +16,9 @@ import {
 
 // --- Constants ---
 const EVENT_DATE = new Date('2026-05-23T20:30:00');
-const RSVP_PHONE = '3104433742';
+const RSVP_PHONE = '3205708928';
 const RSVP_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLSc7GEz6xJi9aflSejTHxACtdCNa9JxXE9gQSs4wGoJPI7iwUg/viewform?usp=header';
-const MUSIC_URL = 'https://docs.google.com/uc?id=1gYlqwjkQyAPFJJE8X5Ol8Ypu6tN9CDSq'; // Elegant placeholder
+const MUSIC_URL = 'https://lh3.googleusercontent.com/d/1aDRgTgniHW6ePa8YjASHJeE8HMAegEBn'; // Elegant placeholder
 
 // --- Components ---
 
@@ -284,7 +284,7 @@ export default function App() {
             <Carousel.Item>
               <img
                 className="d-block w-full h-[600px] object-cover"
-                src="https://images.unsplash.com/photo-1549417229-aa67d3263c09?q=80&w=2070&auto=format&fit=crop"
+                src="https://lh3.googleusercontent.com/d/152Zmkwq1suhYuzi81us6SO5j_Sy6vYmB"
                 alt="First slide"
                 referrerPolicy="no-referrer"
               />
