@@ -109,9 +109,88 @@ const MusicPlayer = () => {
 };
 
 export default function App() {
+  const [isOpened, setIsOpened] = useState(false);
+
+  useEffect(() => {
+    // Iniciar la secuencia de apertura automáticamente
+    const timer = setTimeout(() => {
+      setIsOpened(true);
+    }, 3500); // Tiempo total para ver el sobre y su apertura
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] font-['Montserrat'] overflow-x-hidden">
-      {/* --- Hero Section --- */}
+      <AnimatePresence>
+        {!isOpened && (
+          <motion.div
+            key="envelope-overlay"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
+            className="fixed inset-0 z-[100] bg-[#FDFCFB] flex items-center justify-center p-4"
+          >
+            <div className="relative w-full max-w-[350px] aspect-[4/3]">
+              {/* Sombra del sobre */}
+              <div className="absolute inset-0 bg-black/5 blur-2xl transform translate-y-8 scale-90 rounded-full" />
+              
+              {/* Cuerpo del sobre */}
+              <motion.div 
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="relative w-full h-full bg-[#f4f1ea] shadow-xl rounded-b-lg border border-gray-200 overflow-hidden"
+              >
+                {/* Solapa Superior */}
+                <motion.div 
+                  initial={{ rotateX: 0 }}
+                  animate={{ rotateX: -160 }}
+                  transition={{ delay: 1.5, duration: 1.2, ease: "easeInOut" }}
+                  className="absolute top-0 left-0 w-full h-1/2 bg-[#e8e4d8] border-b border-gray-300 shadow-sm rounded-t-lg"
+                  style={{ 
+                    transformOrigin: "top", 
+                    zIndex: 20,
+                    clipPath: "polygon(0 0, 100% 0, 50% 100%)" 
+                  }}
+                />
+
+                {/* Contenido de la carta asomándose */}
+                <motion.div
+                  initial={{ y: 0 }}
+                  animate={{ y: -40 }}
+                  transition={{ delay: 2.2, duration: 1, ease: "easeOut" }}
+                  className="absolute inset-x-4 bottom-4 top-8 bg-white shadow-inner p-4 flex flex-col items-center justify-center border border-gray-100"
+                >
+                  <Heart className="text-black/20 mb-2" size={20} />
+                  <div className="h-1 w-12 bg-gray-100 rounded-full mb-1" />
+                  <div className="h-1 w-8 bg-gray-100 rounded-full" />
+                </motion.div>
+
+                {/* Lados del sobre (frente) */}
+                <div 
+                  className="absolute inset-0 bg-[#f4f1ea]" 
+                  style={{ clipPath: "polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)", zIndex: 10 }}
+                />
+              </motion.div>
+
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="absolute -bottom-12 left-0 w-full text-center text-gray-400 uppercase tracking-[0.3em] text-xs"
+              >
+                Una invitación especial...
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isOpened ? 1 : 0 }}
+        transition={{ duration: 1 }}
+      >
+        {/* --- Hero Section --- */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -314,6 +393,7 @@ export default function App() {
       <footer className="py-8 text-center text-gray-400 text-xs uppercase tracking-widest bg-[#FDFCFB]">
         © 2026 Stiveen13 • Invitaciones 
       </footer>
+    </motion.div>
     </div>
   );
 }
