@@ -145,12 +145,20 @@ const CountdownTimer = () => {
   );
 
   return (
-    <div className="flex gap-3 justify-center mt-8 relative z-10">
-      <TimeUnit value={timeLeft.days} label="Días" />
-      <TimeUnit value={timeLeft.hours} label="Horas" />
-      <TimeUnit value={timeLeft.minutes} label="Min" />
-      <TimeUnit value={timeLeft.seconds} label="Seg" />
-    </div>
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 1.6 }}
+      className="paper-note mx-auto max-w-sm mt-8 relative z-10"
+    >
+      <div className="flex gap-3 justify-center">
+        <TimeUnit value={timeLeft.days} label="Días" />
+        <TimeUnit value={timeLeft.hours} label="Horas" />
+        <TimeUnit value={timeLeft.minutes} label="Min" />
+        <TimeUnit value={timeLeft.seconds} label="Seg" />
+      </div>
+      <p className="mt-4 text-[10px] uppercase tracking-[0.3em] font-bold text-quince-gold/40">Faltan para el gran día</p>
+    </motion.div>
   );
 };
 
@@ -384,19 +392,6 @@ export default function App() {
           transition={{ duration: 1 }}
           className="relative max-w-4xl w-full z-10 p-12 md:p-20 flex flex-col items-center justify-center min-h-[600px]"
         >
-          {/* Card Shape as in the image */}
-          <div className="absolute inset-0 bg-white scalloped-mask shadow-2xl overflow-hidden -z-10 border-4 border-quince-rose/20 painterly-border">
-             <div className="absolute inset-0 bg-gradient-to-br from-white via-quince-cream to-white" />
-          </div>
-          
-          {/* Floral decorations corners as in the image */}
-          <div className="absolute top-0 left-0 w-48 h-48 pointer-events-none opacity-80 rotate-[10deg] -translate-x-10 -translate-y-10">
-             <FlowerIcon className="w-full h-full text-quince-blush" />
-          </div>
-          <div className="absolute bottom-0 right-0 w-48 h-48 pointer-events-none opacity-80 rotate-[190deg] translate-x-10 translate-y-10">
-             <FlowerIcon className="w-full h-full text-quince-rose" />
-          </div>
-
           <div className="max-w-2xl w-full">
             <motion.p
               initial={{ opacity: 0, y: 10 }}
@@ -462,12 +457,9 @@ export default function App() {
               {/* Artistic Background Glow */}
               <div className="absolute inset-0 bg-quince-blush/30 blur-[120px] rounded-full scale-110" />
               
-              {/* Single Large Frame with Photoshop-style Brushstroke Mask */}
-              <div className="relative h-full w-full shadow-2xl p-2 md:p-4 overflow-hidden">
-                {/* Gold artistic frame background */}
-                <div className="absolute inset-0 bg-quince-gold/20 brushstroke-mask" style={{ transform: 'scale(1.01)' }} />
-                
-                <div className="relative h-full w-full bg-white brushstroke-mask overflow-hidden">
+              {/* Single Large Frame with Elegant Card Style */}
+              <div className="relative h-full w-full p-2 md:p-4">
+                <div className="relative h-full w-full card-photo-frame">
                   <Carousel fade indicators={false} controls={true} className="h-full">
                   {[             
                     "https://lh3.googleusercontent.com/d/1hmFTCot3RiPIudaozBv9HG8W-JUR_DYQ"
