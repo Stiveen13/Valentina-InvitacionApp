@@ -138,27 +138,19 @@ const CountdownTimer = () => {
   }, []);
 
   const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center px-3 py-2 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-md min-w-[70px]">
-      <span className="text-3xl font-bold text-quince-gold">{value.toString().padStart(2, '0')}</span>
-      <span className="text-[10px] uppercase tracking-widest text-quince-gold/60 font-bold">{label}</span>
+    <div className="flex flex-col items-center px-1.5 py-1 md:px-3 md:py-2 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-md min-w-[55px] sm:min-w-[65px] md:min-w-[80px]">
+      <span className="text-xl sm:text-2xl md:text-3xl font-bold text-quince-gold">{value.toString().padStart(2, '0')}</span>
+      <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-quince-gold/60 font-bold">{label}</span>
     </div>
   );
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 1.6 }}
-      className="paper-note mx-auto max-w-sm mt-8 relative z-10"
-    >
-      <div className="flex gap-3 justify-center">
-        <TimeUnit value={timeLeft.days} label="Días" />
-        <TimeUnit value={timeLeft.hours} label="Horas" />
-        <TimeUnit value={timeLeft.minutes} label="Min" />
-        <TimeUnit value={timeLeft.seconds} label="Seg" />
-      </div>
-      <p className="mt-4 text-[10px] uppercase tracking-[0.3em] font-bold text-quince-gold/40">Faltan para el gran día</p>
-    </motion.div>
+    <div className="flex gap-1.5 sm:gap-2 md:gap-3 justify-center mt-8 relative z-10 w-full px-1">
+      <TimeUnit value={timeLeft.days} label="Días" />
+      <TimeUnit value={timeLeft.hours} label="Horas" />
+      <TimeUnit value={timeLeft.minutes} label="Min" />
+      <TimeUnit value={timeLeft.seconds} label="Seg" />
+    </div>
   );
 };
 
