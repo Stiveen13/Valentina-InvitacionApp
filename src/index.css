@@ -1,1 +1,161 @@
 @import "tailwindcss";
+
+@theme {
+  --color-quince-rose: #F8D7DA;
+  --color-quince-blush: #E8A8B1;
+  --color-quince-cream: #FFF9F5;
+  --color-quince-gold: #D4AF37;
+  --color-quince-gold-light: #E6C76A;
+  --color-quince-text: #8E6E5E;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-quince-cream);
+    background-image: 
+      radial-gradient(at 10% 10%, #F8D7DA 0px, transparent 50%),
+      radial-gradient(at 90% 10%, #FFF9F5 0px, transparent 50%),
+      radial-gradient(at 50% 50%, #E8A8B1 0px, transparent 50%),
+      radial-gradient(at 20% 80%, #FFF9F5 0px, transparent 50%),
+      radial-gradient(at 80% 80%, #F8D7DA 0px, transparent 50%),
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    @apply text-quince-text;
+  }
+}
+
+.scalloped-mask {
+  mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10,20 a10,10 0 0,1 15,-5 a10,10 0 0,1 25,0 a10,10 0 0,1 25,0 a10,10 0 0,1 15,5 a10,10 0 0,1 5,15 a10,10 0 0,1 0,30 a10,10 0 0,1 0,30 a10,10 0 0,1 -5,15 a10,10 0 0,1 -15,5 a10,10 0 0,1 -25,0 a10,10 0 0,1 -25,0 a10,10 0 0,1 -15,-5 a10,10 0 0,1 -5,-15 a10,10 0 0,1 0,-30 a10,10 0 0,1 0,-30 a10,10 0 0,1 5,-15 Z" fill="black" /></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M10,20 a10,10 0 0,1 15,-5 a10,10 0 0,1 25,0 a10,10 0 0,1 25,0 a10,10 0 0,1 15,5 a10,10 0 0,1 5,15 a10,10 0 0,1 0,30 a10,10 0 0,1 0,30 a10,10 0 0,1 -5,15 a10,10 0 0,1 -15,5 a10,10 0 0,1 -25,0 a10,10 0 0,1 -25,0 a10,10 0 0,1 -15,-5 a10,10 0 0,1 -5,-15 a10,10 0 0,1 0,-30 a10,10 0 0,1 0,-30 a10,10 0 0,1 5,-15 Z" fill="black" /></svg>');
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+}
+
+.quince-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.brush-stroke {
+  position: absolute;
+  filter: blur(60px);
+  opacity: 0.4;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+
+.gold-sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, #E6C76A 0%, transparent 70%);
+  border-radius: 50%;
+  box-shadow: 0 0 10px #E6C76A;
+  animation: shimmer 3s infinite ease-in-out;
+}
+
+.torn-paper {
+  position: relative;
+  mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 L100 0 L100 85 Q95 90 90 85 Q85 80 80 85 Q75 90 70 85 Q65 80 60 85 Q55 90 50 85 Q45 80 40 85 Q35 90 30 85 Q25 80 20 85 Q15 90 10 85 Q5 80 0 85 Z" fill="black" /></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 L100 0 L100 85 Q95 90 90 85 Q85 80 80 85 Q75 90 70 85 Q65 80 60 85 Q55 90 50 85 Q45 80 40 85 Q35 90 30 85 Q25 80 20 85 Q15 90 10 85 Q5 80 0 85 Z" fill="black" /></svg>');
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+}
+
+.cloud-mask {
+  mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg"><path d="M40,80 a35,35 0 0,1 0,-60 a40,40 0 0,1 60,-10 a45,45 0 0,1 70,20 a35,35 0 0,1 10,50 a40,40 0 0,1 -30,40 a50,50 0 0,1 -70,10 a40,40 0 0,1 -40,-50 z" fill="black" /></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg"><path d="M40,80 a35,35 0 0,1 0,-60 a40,40 0 0,1 60,-10 a45,45 0 0,1 70,20 a35,35 0 0,1 10,50 a40,40 0 0,1 -30,40 a50,50 0 0,1 -70,10 a40,40 0 0,1 -40,-50 z" fill="black" /></svg>');
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.painterly-border {
+  border: 12px solid white;
+  box-shadow: 0 10px 30px rgba(155, 107, 195, 0.2);
+  transform: rotate(-1deg);
+  transition: transform 0.3s ease;
+}
+
+.painterly-border:hover {
+  transform: rotate(0deg) scale(1.02);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes flutter-butterfly {
+  from { transform: rotateX(0); }
+  to { transform: rotateX(80deg); }
+}
+
+.butterfly-container {
+  /* introduce 2nd reference circle to use angle of */
+  --PI: 3.14159;
+  --RADIUS-ANIMATION-ANGLE: var(--PI); 
+  --r-min: 2; 
+  --r-max: 10; 
+  --delta-r: calc(var(--r-max) - var(--r-min));
+  /* progress should be provided via inline style or animation */
+  --gamma-reference-angle: calc(var(--progress, 0) * var(--RADIUS-ANIMATION-ANGLE));
+  --r: calc(var(--r-min) + var(--delta-r) * sin(var(--gamma-reference-angle)));
+
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.butterfly {
+  background: none;
+  color: hotpink;
+}
+
+.butterfly svg {
+  width: 50px;
+  height: 50px;
+}
+
+.butterfly path {
+  fill: currentColor;
+}
+
+.butterfly__wing {
+  transform-origin: center center;
+  animation: flutter-butterfly 150ms alternate infinite;
+}
+
+.pincel-frame {
+  position: relative;
+  overflow: hidden;
+}
+
+.pincel-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.brushstroke-mask {
+  mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg"><filter id="rough-vertical"><feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves="8" result="noise" /><feDisplacementMap in="SourceGraphic" in2="noise" scale="60" /></filter><rect x="15" y="15" width="270" height="470" filter="url(%23rough-vertical)" fill="black" /><rect x="40" y="40" width="220" height="420" fill="black" /></svg>');
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 300 500" xmlns="http://www.w3.org/2000/svg"><filter id="rough-vertical"><feTurbulence type="fractalNoise" baseFrequency="0.12" numOctaves="8" result="noise" /><feDisplacementMap in="SourceGraphic" in2="noise" scale="60" /></filter><rect x="15" y="15" width="270" height="470" filter="url(%23rough-vertical)" fill="black" /><rect x="40" y="40" width="220" height="420" fill="black" /></svg>');
+  mask-size: 100% 100%;
+  -webkit-mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+}
