@@ -78,7 +78,7 @@ const SparklingLight = ({ className }: { className?: string }) => (
 
 const MagicDust = () => (
   <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    {[...Array(40)].map((_, i) => (
+    {[...Array(25)].map((_, i) => (
       <motion.div
         key={i}
         initial={{ 
@@ -112,37 +112,40 @@ const MagicDust = () => (
 );
 
 const CountdownTimer = () => {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
+  const calculateTimeLeft = () => {
+    const now = new Date();
+    const difference = EVENT_DATE.getTime() - now.getTime();
+    
+    if (difference <= 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60)
+    };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const now = new Date();
-      const difference = EVENT_DATE.getTime() - now.getTime();
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60)
-        });
-      }
+      setTimeLeft(calculateTimeLeft());
     }, 1000);
 
     return () => clearInterval(timer);
   }, []);
 
-  const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center px-1.5 py-1 md:px-3 md:py-2 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-md min-w-[55px] sm:min-w-[65px] md:min-w-[80px]">
-      <span className="text-xl sm:text-2xl md:text-3xl font-bold text-quince-gold">{value.toString().padStart(2, '0')}</span>
+  const TimeUnit = React.memo(({ value, label }: { value: number; label: string }) => (
+    <div className="flex flex-col items-center px-1.5 py-1 md:px-3 md:py-2 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-md min-w-[60px] sm:min-w-[70px] md:min-w-[90px]">
+      <span className="text-xl sm:text-2xl md:text-3xl font-bold text-quince-gold tabular-nums">
+        {value.toString().padStart(2, '0')}
+      </span>
       <span className="text-[8px] md:text-[10px] uppercase tracking-widest text-quince-gold/60 font-bold">{label}</span>
     </div>
-  );
+  ));
 
   return (
     <div className="flex gap-1.5 sm:gap-2 md:gap-3 justify-center mt-8 relative z-10 w-full px-1">
@@ -398,11 +401,26 @@ export default function App() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1 }}
-          className="relative max-w-5xl w-full z-10 p-12 md:p-24 flex flex-col items-center justify-center min-h-[750px] bg-quince-gold-bg rounded-[2.5rem] shadow-2xl overflow-hidden border-2 border-black"
+          className="relative max-w-5xl w-full z-10 p-12 md:p-24 flex flex-col items-center justify-center min-h-[800px] bg-quince-gold-bg shadow-[0_30px_70px_rgba(0,0,0,0.4)] border-x-4 border-black/10"
+          style={{
+            backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.05) 100%)'
+          }}
         >
-          {/* Card Shape with purple accents */}
-          <div className="absolute inset-0 bg-black/5 -z-10 rounded-[1.5rem] border-4 border-black/20">
-             <div className="absolute inset-0 bg-gradient-to-br from-[#6d3088]/10 to-transparent" />
+          {/* Scroll Top Roll */}
+          <div className="absolute -top-4 left-[-10px] right-[-10px] h-10 bg-[#e0bc7a] rounded-full border-2 border-black/20 shadow-md z-20 flex items-center justify-between px-2">
+            <div className="w-4 h-8 bg-black/20 rounded-full" />
+            <div className="w-4 h-8 bg-black/20 rounded-full" />
+          </div>
+
+          {/* Scroll Bottom Roll */}
+          <div className="absolute -bottom-4 left-[-10px] right-[-10px] h-10 bg-[#e0bc7a] rounded-full border-2 border-black/20 shadow-md z-20 flex items-center justify-between px-2">
+            <div className="w-4 h-8 bg-black/20 rounded-full" />
+            <div className="w-4 h-8 bg-black/20 rounded-full" />
+          </div>
+
+          {/* Card Shape with subtle paper texture effect */}
+          <div className="absolute inset-0 bg-black/5 -z-10 border-4 border-black/5">
+             <div className="absolute inset-0 bg-gradient-to-br from-[#6d3088]/5 to-transparent" />
           </div>
           
           <div className="max-w-2xl w-full">
@@ -551,8 +569,26 @@ export default function App() {
         </Container>
       </section>
 
-      
-     
+      {/* --- Map Section --- */}
+      <section className="py-24 bg-white/20 backdrop-blur-sm relative overflow-hidden">
+         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-quince-rose/10 to-transparent" />
+        <Container className="relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-4 text-white">¿Cómo llegar?</h2>
+            <p className="text-quince-gold-light font-bold uppercase tracking-widest text-xs">Te esperamos en Villa Luna para celebrar juntos.</p>
+          </div>
+          <div className="rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white h-[450px]">
+            <iframe
+               src="https://www.google.com/maps?q=4.084644909258949,-76.23115512016295&hl=es&z=17&output=embed"
+               width="100%"
+               height="100%"
+               style={{ border: 0 }}
+               loading="lazy"
+               allowFullScreen
+            ></iframe>
+          </div>
+        </Container>
+      </section>
 
       {/* --- Dress Code Section --- */}
       <section className="py-24 bg-white/10 backdrop-blur-sm relative overflow-hidden">
@@ -572,27 +608,6 @@ export default function App() {
               El color lila está reservado para la quinceañera 💜
             </p>
           </motion.div>
-        </Container>
-      </section>
-
-      {/* --- Map Section --- */}
-      <section className="py-24 bg-white/20 backdrop-blur-sm relative overflow-hidden">
-         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-quince-rose/10 to-transparent" />
-        <Container className="relative z-10">
-          <div className="text-center mb-12">
-            <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-4 text-white">¿Cómo llegar?</h2>
-            <p className="text-quince-gold-light font-bold uppercase tracking-widest text-xs">Te esperamos en Villa Luna para celebrar juntos.</p>
-          </div>
-          <div className="rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white h-[450px]">
-            <iframe
-               src="https://www.google.com/maps?q=4.084644909258949,-76.23115512016295&hl=es&z=17&output=embed"
-               width="100%"
-               height="100%"
-               style={{ border: 0 }}
-               loading="lazy"
-               allowFullScreen
-            ></iframe>
-          </div>
         </Container>
       </section>
 
@@ -622,9 +637,9 @@ export default function App() {
               href={`https://wa.me/${RSVP_PHONE}`} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-quince-text font-bold hover:text-quince-gold transition-colors text-lg"
+              className="flex items-center gap-2 text-white font-bold hover:text-quince-gold transition-colors text-lg"
             >
-              <Phone size={24} className="text-quince-gold" />
+              <Phone size={24} className="text-white" />
               <span>WhatsApp: {RSVP_PHONE}</span>
             </a>
           </div>
