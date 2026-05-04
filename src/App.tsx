@@ -238,6 +238,7 @@ const RSVPForm = () => {
     numero: ''
   });
   const [status, setStatus] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleEnviar = async () => {
     const { nombre, asistira, numero } = formData;
@@ -258,7 +259,7 @@ const RSVPForm = () => {
       });
 
       setStatus("✅ Confirmación enviada");
-
+      
       // 📲 WhatsApp - Usamos window.location.href para asegurar compatibilidad en móviles
       const mensaje = `🎉 Confirmación de asistencia:
 Nombre: ${nombre}
@@ -266,12 +267,34 @@ Asistencia: ${asistira}
 Número de personas: ${numero}`;
 
       const waUrl = `https://wa.me/${RSVP_PHONE}?text=${encodeURIComponent(mensaje)}`;
-      window.location.href = waUrl;
+      
+      // Pequeña pausa para que vean el check antes de redirigir y ocultar
+      setTimeout(() => {
+        setIsSubmitted(true);
+        window.location.href = waUrl;
+      }, 1000);
+
     } catch (error) {
       console.error("Error al enviar:", error);
       setStatus("❌ Hubo un error, intenta de nuevo");
     }
   };
+
+  if (isSubmitted) {
+    return (
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="max-w-md mx-auto bg-white/20 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10 text-center"
+      >
+        <div className="w-20 h-20 bg-[#25D366] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <span className="text-4xl">✅</span>
+        </div>
+        <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-2 text-white">¡Gracias por confirmar!</h3>
+        <p className="text-white/80 italic">Tu respuesta ha sido registrada. ¡Nos vemos pronto!</p>
+      </motion.div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto bg-white/20 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10">
@@ -327,7 +350,7 @@ Número de personas: ${numero}`;
         </motion.button>
 
         {status && (
-          <p className="mt-4 text-white font-bold animate-pulse">{status}</p>
+          <p className="mt-4 text-white font-bold animate-pulse text-center">{status}</p>
         )}
       </div>
     </div>
@@ -702,11 +725,19 @@ export default function App() {
         <FlowerIcon className="absolute -bottom-20 -left-20 w-96 h-96 text-quince-gold/10 animate-spin-slow-reverse opacity-20" />
 
         <Container className="relative z-10">
-          <h2 className="font-['Alex_Brush'] text-8xl mb-6 text-quince-gold drop-shadow-lg">Asistencia</h2>
+          
           <p className="font-['Playfair_Display'] italic text-2xl mb-10 text-white/90">
             Tu presencia es nuestro mejor regalo.
           </p>
           
+          <div className="mb-16 pb-16 border-b border-white/20 text-white flex flex-col items-center">
+            <Gift className="mb-4 text-quince-gold animate-bounce" size={40} />
+            <p className="uppercase tracking-[0.4em] text-xs opacity-50 mb-2 font-bold">Lluvia de Sobres</p>
+            <p className="font-['Playfair_Display'] italic text-3xl">¡Te esperamos!</p>
+          </div>
+          
+          <h2 className="font-['Alex_Brush'] text-8xl mb-6 text-quince-gold drop-shadow-lg">Asistencia</h2>
+
           <RSVPForm />
 
           <div className="mt-8 flex flex-col items-center">
@@ -720,12 +751,6 @@ export default function App() {
               <Phone size={24} className="text-white" />
               <span>WhatsApp: {RSVP_PHONE}</span>
             </a>
-          </div>
-
-          <div className="mt-20 pt-16 border-t border-white/20 text-white flex flex-col items-center">
-            <Gift className="mb-4 text-quince-gold animate-bounce" size={40} />
-            <p className="uppercase tracking-[0.4em] text-xs opacity-50 mb-2 font-bold">Lluvia de Sobres</p>
-            <p className="font-['Playfair_Display'] italic text-3xl">¡Te esperamos!</p>
           </div>
         </Container>
       </section>
