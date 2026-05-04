@@ -241,7 +241,7 @@ export default function App() {
       setIsOpened(true);
       // Dispatch custom event to trigger music
       window.dispatchEvent(new Event('invitationOpened'));
-    }, 2500);
+    }, 1800);
   };
 
   return (
@@ -265,7 +265,6 @@ export default function App() {
             exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
             className="fixed inset-0 z-[100] bg-quince-cream flex flex-col items-center justify-center p-4"
           >
-            <WatercolorBackground />
             
             {!isOpening && (
               <motion.div 
@@ -370,7 +369,7 @@ export default function App() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isOpened ? 1 : 0 }}
-        transition={{ duration: 1 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
       >
         {/* --- Hero Section --- */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center isolate overflow-hidden">
@@ -398,9 +397,6 @@ export default function App() {
         ))}
 
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1 }}
           className="relative max-w-5xl w-full z-10 p-12 md:p-24 flex flex-col items-center justify-center min-h-[800px] bg-quince-gold-bg shadow-[0_30px_70px_rgba(0,0,0,0.4)] border-x-4 border-black/10"
           style={{
             backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.05) 0%, transparent 10%, transparent 90%, rgba(0,0,0,0.05) 100%)'
@@ -425,18 +421,18 @@ export default function App() {
           
           <div className="max-w-2xl w-full">
             <motion.p
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
               className="font-['Alex_Brush'] text-5xl md:text-6xl text-quince-rose mb-2 drop-shadow-sm"
             >
               Mis
             </motion.p>
             
             <motion.h1
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.8, duration: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
               className="font-['Alex_Brush'] text-7xl md:text-9xl text-quince-rose mb-6 drop-shadow-sm leading-tight"
             >
               Quince Años
@@ -455,14 +451,9 @@ export default function App() {
                <div className="h-px w-16 bg-quince-rose" />
             </div>
  
-            <motion.p 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.4 }}
-              className="font-['Playfair_Display'] italic text-xl md:text-2xl text-black/80 mt-6 mb-8 max-w-lg mx-auto leading-relaxed"
-            >
+            <p className="font-['Playfair_Display'] italic text-xl md:text-2xl text-black/80 mt-6 mb-8 max-w-lg mx-auto leading-relaxed">
               "El 24 de mayo de 2011 nació una niña llamada Xiomara, esperada con anhelo y amor por sus padres, familia y amigos. Hoy, quince años después, te invitamos a celebrar con el mismo amor este momento tan especial.  Te espero para compartir juntos mi cuento de fantasía, en una noche llena de luz, magia y encanto. "
-            </motion.p>
+            </p>
 
             <CountdownTimer />
           </div>
@@ -479,12 +470,7 @@ export default function App() {
       <section id="carousel-section" className="py-24 relative overflow-hidden bg-white/10 backdrop-blur-[2px]">
         <Container fluid className="px-0">
           <div className="max-w-[95vw] md:max-w-3xl mx-auto px-2">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="relative aspect-[3/5] md:aspect-[4/5] w-full"
-            >
+            <div className="relative aspect-[3/5] md:aspect-[4/5] w-full">
               {/* Artistic Background Glow */}
               <div className="absolute inset-0 bg-quince-blush/30 blur-[120px] rounded-full scale-110" />
               
@@ -517,7 +503,7 @@ export default function App() {
               <div className="absolute -bottom-12 -right-12 w-32 h-32 text-quince-gold opacity-60 animate-pulse">
                 <FlowerIcon className="w-full h-full" />
               </div>
-            </motion.div>
+            </div>
           </div>
           
           <motion.p 
@@ -593,12 +579,7 @@ export default function App() {
       {/* --- Dress Code Section --- */}
       <section className="py-24 bg-white/10 backdrop-blur-sm relative overflow-hidden">
         <Container className="relative z-10 text-center">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className="max-w-xl mx-auto p-12 rounded-[2.5rem] border-2 border-black bg-quince-gold-bg shadow-xl"
-          >
+          <div className="max-w-xl mx-auto p-12 rounded-[2.5rem] border-2 border-black bg-quince-gold-bg shadow-xl">
             <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-6 text-quince-rose">Código de Vestimenta</h2>
             <p className="font-['Playfair_Display'] italic text-2xl text-black leading-relaxed mb-6">
               Traje Formal / Elegante
@@ -607,7 +588,7 @@ export default function App() {
             <p className="text-xl font-bold text-quince-rose uppercase tracking-[0.2em] bg-black/10 py-4 px-6 rounded-2xl inline-block border border-black/10">
               El color lila está reservado para la quinceañera 💜
             </p>
-          </motion.div>
+          </div>
         </Container>
       </section>
 
