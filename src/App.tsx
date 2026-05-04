@@ -16,8 +16,8 @@ import {
 
 // --- Constants ---
 const EVENT_DATE = new Date('2026-05-23T20:00:00');
-const RSVP_PHONE = '3104433742';
-const RSVP_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLSc7GEz6xJi9aflSejTHxACtdCNa9JxXE9gQSs4wGoJPI7iwUg/viewform?usp=header';
+const RSVP_PHONE = '573205708928';
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycby8fPPLOm8YwWQpWauBah-DaUn3Gllqw-DQLmMZbKKA2ujq9Sg-QpLh4gtZfKo1KxrhhA/exec";
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/19jkS86eJQggcaqPbNdSptFVcj3-4AB81/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Chayanne & Danna Paola - Veo en ti la luz
 
 // --- Components ---
@@ -227,6 +227,108 @@ const MusicPlayer = () => {
           </motion.div>
         )}
       </motion.button>
+    </div>
+  );
+};
+
+const RSVPForm = () => {
+  const [formData, setFormData] = useState({
+    nombre: '',
+    asistira: '',
+    numero: ''
+  });
+  const [status, setStatus] = useState('');
+
+  const handleEnviar = async () => {
+    const { nombre, asistira, numero } = formData;
+
+    if (!nombre || !asistira || !numero) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
+    setStatus("Enviando...");
+
+    try {
+      // 🔥 Guardar en Google Sheets
+      await fetch(SHEETS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(formData)
+      });
+
+      setStatus("✅ Confirmación enviada");
+
+      // 📲 WhatsApp
+      const mensaje = `🎉 Confirmación de asistencia:
+Nombre: ${nombre}
+Asistencia: ${asistira}
+Número de personas: ${numero}`;
+
+      window.open(`https://wa.me/${RSVP_PHONE}?text=${encodeURIComponent(mensaje)}`, '_blank');
+    } catch (error) {
+      console.error("Error al enviar:", error);
+      setStatus("❌ Hubo un error, intenta de nuevo");
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-white/20 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10">
+      <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-4 text-white">🎉 ¡Queremos celebrar contigo!</h3>
+      <p className="text-white/80 mb-8 italic">Confirma tu asistencia completando el siguiente formulario</p>
+
+      <div className="space-y-6 text-left">
+        <div>
+          <input 
+            type="text"
+            placeholder="Tu nombre" 
+            value={formData.nombre}
+            onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+            className="w-full p-4 rounded-xl bg-white/50 border border-white/60 focus:ring-2 focus:ring-quince-gold outline-none text-black placeholder-black/50"
+          />
+        </div>
+
+        <div>
+          <label className="block text-white font-bold mb-2 text-sm">Nos encantaría contar contigo, ¿podrás acompañarnos?</label>
+          <select 
+            value={formData.asistira}
+            onChange={(e) => setFormData({...formData, asistira: e.target.value})}
+            className="w-full p-4 rounded-xl bg-white/50 border border-white/60 focus:ring-2 focus:ring-quince-gold outline-none text-black transition-all"
+          >
+            <option value="">Selecciona una opción</option>
+            <option value="Sí, allí estaré">Sí, allí estaré</option>
+            <option value="No podré asistir">No podré asistir</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-white font-bold mb-2 text-sm">Número total de asistentes</label>
+          <select 
+            value={formData.numero}
+            onChange={(e) => setFormData({...formData, numero: e.target.value})}
+            className="w-full p-4 rounded-xl bg-white/50 border border-white/60 focus:ring-2 focus:ring-quince-gold outline-none text-black transition-all"
+          >
+            <option value="">Selecciona</option>
+            {[1, 2, 3, 4, 5, 6].map(num => (
+              <option key={num} value={num}>{num}</option>
+            ))}
+          </select>
+        </div>
+
+        <motion.button 
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={handleEnviar}
+          className="w-full bg-[#25D366] text-white py-4 rounded-xl font-bold shadow-xl flex items-center justify-center gap-2 transition-transform"
+        >
+          <Phone size={20} />
+          Confirmar asistencia
+        </motion.button>
+
+        {status && (
+          <p className="mt-4 text-white font-bold animate-pulse">{status}</p>
+        )}
+      </div>
     </div>
   );
 };
@@ -604,28 +706,22 @@ export default function App() {
             Tu presencia es nuestro mejor regalo.
           </p>
           
-          <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
-            <Button 
-               variant="light" 
-               size="lg" 
-              className="px-12 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-sm bg-gradient-to-r from-[#6d3088] to-[#8e44ad] text-white border-none shadow-2xl hover:scale-110 active:scale-95 transition-all"
-               onClick={() => window.open(RSVP_LINK, '_blank')}
-              >
-               Confirmar Formulario
-            </Button>
-            
-            <a 
+          <RSVPForm />
+
+          <div className="mt-8 flex flex-col items-center">
+             <p className="text-white/60 text-sm mb-4 italic">¿Tienes alguna duda? Comunícate con el encargado:</p>
+             <a 
               href={`https://wa.me/${RSVP_PHONE}`} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-white font-bold hover:text-quince-gold transition-colors text-lg"
+              className="flex items-center gap-3 text-white font-bold hover:text-quince-gold transition-colors text-lg bg-white/10 px-6 py-3 rounded-full border border-white/20 backdrop-blur-sm"
             >
               <Phone size={24} className="text-white" />
               <span>WhatsApp: {RSVP_PHONE}</span>
             </a>
           </div>
 
-          <div className="mt-16 pt-16 border-t border-white/20 text-white flex flex-col items-center">
+          <div className="mt-20 pt-16 border-t border-white/20 text-white flex flex-col items-center">
             <Gift className="mb-4 text-quince-gold animate-bounce" size={40} />
             <p className="uppercase tracking-[0.4em] text-xs opacity-50 mb-2 font-bold">Lluvia de Sobres</p>
             <p className="font-['Playfair_Display'] italic text-3xl">¡Te esperamos!</p>
