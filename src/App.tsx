@@ -16,7 +16,7 @@ import {
 
 // --- Constants ---
 const EVENT_DATE = new Date('2026-05-23T20:00:00');
-const RSVP_PHONE = '573205708928';
+const RSVP_PHONE = '573104433742';
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycby8fPPLOm8YwWQpWauBah-DaUn3Gllqw-DQLmMZbKKA2ujq9Sg-QpLh4gtZfKo1KxrhhA/exec";
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/19jkS86eJQggcaqPbNdSptFVcj3-4AB81/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Chayanne & Danna Paola - Veo en ti la luz
 
