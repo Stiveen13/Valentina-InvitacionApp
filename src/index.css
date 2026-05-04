@@ -1,12 +1,13 @@
 @import "tailwindcss";
 
 @theme {
-  --color-quince-rose: #F8D7DA;
-  --color-quince-blush: #E8A8B1;
-  --color-quince-cream: #FFF9F5;
+  --color-quince-rose: #6d3088;
+  --color-quince-blush: #9f20bf;
+  --color-quince-cream: #945ac2;
   --color-quince-gold: #D4AF37;
-  --color-quince-gold-light: #E6C76A;
-  --color-quince-text: #8E6E5E;
+  --color-quince-gold-light: #F4D03F;
+  --color-quince-gold-bg: #f9ce75;
+  --color-quince-text: #ffffff;
 }
 
 @layer base {

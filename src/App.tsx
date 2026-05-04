@@ -15,8 +15,8 @@ import {
 } from 'lucide-react';
 
 // --- Constants ---
-const EVENT_DATE = new Date('2026-05-23T20:30:00');
-const RSVP_PHONE = '3205708928';
+const EVENT_DATE = new Date('2026-05-23T20:00:00');
+const RSVP_PHONE = '3104433742';
 const RSVP_LINK = 'https://docs.google.com/forms/d/e/1FAIpQLSc7GEz6xJi9aflSejTHxACtdCNa9JxXE9gQSs4wGoJPI7iwUg/viewform?usp=header';
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/19jkS86eJQggcaqPbNdSptFVcj3-4AB81/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Chayanne & Danna Paola - Veo en ti la luz
 
@@ -40,10 +40,10 @@ const FlowerIcon = ({ className }: { className?: string }) => (
 
 const WatercolorBackground = () => (
   <div className="quince-bg pointer-events-none">
-    <div className="brush-stroke w-[600px] h-[600px] bg-quince-rose -top-20 -left-20" />
-    <div className="brush-stroke w-[500px] h-[500px] bg-quince-blush top-1/4 -right-10" />
+    <div className="brush-stroke w-[600px] h-[600px] bg-quince-rose/30 -top-20 -left-20" />
+    <div className="brush-stroke w-[500px] h-[500px] bg-quince-blush/30 top-1/4 -right-10" />
     <div className="brush-stroke w-[700px] h-[700px] bg-quince-cream -bottom-20 left-10" />
-    <div className="brush-stroke w-[400px] h-[400px] bg-quince-rose bottom-1/4 right-1/4" />
+    <div className="brush-stroke w-[400px] h-[400px] bg-quince-rose/20 bottom-1/4 right-1/4" />
     
     {[...Array(20)].map((_, i) => (
       <div 
@@ -242,7 +242,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen relative text-quince-text font-['Montserrat'] overflow-x-hidden">
+    <div className="min-h-screen relative text-quince-text font-['Montserrat'] overflow-x-hidden bg-quince-cream">
       <WatercolorBackground />
       <MagicDust />
       
@@ -274,20 +274,20 @@ export default function App() {
                 <motion.div 
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="mb-8 text-quince-gold font-['Playfair_Display'] italic text-2xl tracking-[0.2em]"
+                  className="mb-8 text-black font-['Playfair_Display'] italic text-2xl tracking-[0.2em] font-bold"
                 >
                   Toca para abrir
                 </motion.div>
 
-                <div className="relative w-full max-w-[350px] aspect-[4/3]">
+                <div className="relative w-full max-w-[450px] aspect-[4/3]">
                   {/* Sombra del sobre */}
-                  <div className="absolute inset-0 bg-quince-gold/10 blur-2xl transform translate-y-8 scale-90 rounded-full" />
+                  <div className="absolute inset-0 bg-black/20 blur-2xl transform translate-y-8 scale-90 rounded-full" />
                   
                   {/* Cuerpo del sobre */}
-                  <div className="relative w-full h-full bg-white shadow-2xl rounded-b-lg border border-quince-rose overflow-hidden">
+                  <div className="relative w-full h-full bg-[#6d3088] shadow-2xl rounded-b-lg border-4 border-black overflow-hidden">
                     {/* Solapa Superior */}
                     <div 
-                      className="absolute top-0 left-0 w-full h-1/2 bg-quince-cream border-b border-quince-gold/10 shadow-sm rounded-t-lg"
+                      className="absolute top-0 left-0 w-full h-1/2 bg-[#8e4a9e] border-b-4 border-black shadow-sm rounded-t-lg"
                       style={{ 
                         transformOrigin: "top", 
                         zIndex: 20,
@@ -296,8 +296,16 @@ export default function App() {
                     />
                     {/* Lados del sobre (frente) */}
                     <div 
-                      className="absolute inset-0 bg-[#fefefe]" 
-                      style={{ clipPath: "polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)", zIndex: 10 }}
+                      className="absolute inset-0 bg-[#6d3088]/90 border-t-2 border-black/20" 
+                      style={{ clipPath: "polygon(0 100%, 50% 50%, 100% 100%)", zIndex: 15 }}
+                    />
+                    <div 
+                      className="absolute inset-0 bg-[#6d3088]/80" 
+                      style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%)", zIndex: 10 }}
+                    />
+                    <div 
+                      className="absolute inset-0 bg-[#6d3088]/80" 
+                      style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%)", zIndex: 10 }}
                     />
                   </div>
                 </div>
@@ -305,18 +313,18 @@ export default function App() {
             )}
 
             {isOpening && (
-              <div className="relative w-full max-w-[350px] aspect-[4/3]">
+              <div className="relative w-full max-w-[450px] aspect-[4/3]">
                 {/* Sombra del sobre */}
-                <div className="absolute inset-0 bg-quince-gold/10 blur-2xl transform translate-y-8 scale-90 rounded-full" />
+                <div className="absolute inset-0 bg-black/20 blur-2xl transform translate-y-8 scale-90 rounded-full" />
                 
                 {/* Cuerpo del sobre */}
-                <div className="relative w-full h-full bg-white shadow-2xl rounded-b-lg border border-quince-rose overflow-hidden">
+                <div className="relative w-full h-full bg-[#6d3088] shadow-2xl rounded-b-lg border-4 border-black overflow-hidden">
                   {/* Solapa Superior */}
                   <motion.div 
                     initial={{ rotateX: 0 }}
                     animate={{ rotateX: -160 }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="absolute top-0 left-0 w-full h-1/2 bg-quince-cream border-b border-quince-gold/10 shadow-sm rounded-t-lg"
+                    className="absolute top-0 left-0 w-full h-1/2 bg-[#8e4a9e] border-b-4 border-black shadow-sm rounded-t-lg"
                     style={{ 
                       transformOrigin: "top", 
                       zIndex: 20,
@@ -329,17 +337,25 @@ export default function App() {
                     initial={{ y: 0 }}
                     animate={{ y: -60 }}
                     transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
-                    className="absolute inset-x-4 bottom-4 top-8 bg-white shadow-inner p-4 flex flex-col items-center justify-center border border-quince-gold/10"
+                    className="absolute inset-x-4 bottom-4 top-8 bg-white shadow-inner p-4 flex flex-col items-center justify-center border-2 border-black"
                   >
-                    <FlowerIcon className="text-quince-gold mb-2 w-10 h-10 animate-pulse" />
-                    <div className="h-1 w-12 bg-quince-rose rounded-full mb-1" />
-                    <div className="h-1 w-8 bg-quince-rose rounded-full" />
+                    <FlowerIcon className="text-[#6d3088] mb-2 w-10 h-10 animate-pulse" />
+                    <div className="h-1 w-12 bg-black rounded-full mb-1" />
+                    <div className="h-1 w-8 bg-black rounded-full" />
                   </motion.div>
 
                   {/* Lados del sobre (frente) */}
                   <div 
-                    className="absolute inset-0 bg-[#fefefe]" 
-                    style={{ clipPath: "polygon(0 0, 50% 50%, 100% 0, 100% 100%, 0 100%)", zIndex: 10 }}
+                    className="absolute inset-0 bg-[#6d3088]/90 border-t-2 border-black/20" 
+                    style={{ clipPath: "polygon(0 100%, 50% 50%, 100% 100%)", zIndex: 15 }}
+                  />
+                  <div 
+                    className="absolute inset-0 bg-[#6d3088]/80" 
+                    style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%)", zIndex: 10 }}
+                  />
+                  <div 
+                    className="absolute inset-0 bg-[#6d3088]/80" 
+                    style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%)", zIndex: 10 }}
                   />
                 </div>
               </div>
@@ -362,7 +378,7 @@ export default function App() {
           <motion.div
             key={i}
             animate={{ 
-              opacity: [0.2, 0.4, 0.2],
+              opacity: [0.1, 0.2, 0.1],
               scale: [1, 1.2, 1]
             }}
             transition={{ 
@@ -382,14 +398,19 @@ export default function App() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1 }}
-          className="relative max-w-4xl w-full z-10 p-12 md:p-20 flex flex-col items-center justify-center min-h-[600px]"
+          className="relative max-w-5xl w-full z-10 p-12 md:p-24 flex flex-col items-center justify-center min-h-[750px] bg-quince-gold-bg rounded-[2.5rem] shadow-2xl overflow-hidden border-2 border-black"
         >
+          {/* Card Shape with purple accents */}
+          <div className="absolute inset-0 bg-black/5 -z-10 rounded-[1.5rem] border-4 border-black/20">
+             <div className="absolute inset-0 bg-gradient-to-br from-[#6d3088]/10 to-transparent" />
+          </div>
+          
           <div className="max-w-2xl w-full">
             <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="font-['Alex_Brush'] text-5xl md:text-6xl text-quince-text mb-2 drop-shadow-sm"
+              className="font-['Alex_Brush'] text-5xl md:text-6xl text-quince-rose mb-2 drop-shadow-sm"
             >
               Mis
             </motion.p>
@@ -398,29 +419,29 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.8, duration: 1 }}
-              className="font-['Alex_Brush'] text-7xl md:text-9xl text-quince-gold mb-6 drop-shadow-sm leading-tight"
+              className="font-['Alex_Brush'] text-7xl md:text-9xl text-quince-rose mb-6 drop-shadow-sm leading-tight"
             >
               Quince Años
             </motion.h1>
-
+            
             <div className="flex items-center justify-center gap-4 mb-4">
-               <div className="h-px w-16 bg-quince-gold-light" />
+               <div className="h-px w-16 bg-quince-rose" />
                <motion.h2 
                  initial={{ opacity: 0 }}
                  animate={{ opacity: 1 }}
                  transition={{ delay: 1.2 }}
-                 className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-quince-text tracking-wide"
+                 className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-quince-rose tracking-wide"
                >
                  Xiomara Vásquez Osorio
                </motion.h2>
-               <div className="h-px w-16 bg-quince-gold-light" />
+               <div className="h-px w-16 bg-quince-rose" />
             </div>
-
+ 
             <motion.p 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.4 }}
-              className="font-['Playfair_Display'] italic text-xl md:text-2xl text-quince-text/70 mt-6 mb-8 max-w-lg mx-auto leading-relaxed"
+              className="font-['Playfair_Display'] italic text-xl md:text-2xl text-black/80 mt-6 mb-8 max-w-lg mx-auto leading-relaxed"
             >
               "El 24 de mayo de 2011 nació una niña llamada Xiomara, esperada con anhelo y amor por sus padres, familia y amigos. Hoy, quince años después, te invitamos a celebrar con el mismo amor este momento tan especial.  Te espero para compartir juntos mi cuento de fantasía, en una noche llena de luz, magia y encanto. "
             </motion.p>
@@ -484,7 +505,7 @@ export default function App() {
           <motion.p 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
-            className="mt-16 text-center font-['Playfair_Display'] italic text-2xl text-quince-text/80 max-w-2xl mx-auto px-4 leading-relaxed"
+            className="mt-16 text-center font-['Playfair_Display'] italic text-2xl text-white max-w-2xl mx-auto px-4 leading-relaxed"
           >
             " Gracias por ser parte de mi cuento."
           </motion.p>
@@ -498,32 +519,32 @@ export default function App() {
           <Row className="text-center g-5">
             <Col md={4}>
               <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-quince-rose text-white rounded-full flex items-center justify-center mb-4 shadow-xl">
+                <div className="w-16 h-16 bg-quince-rose text-white rounded-full flex items-center justify-center mb-4 shadow-xl border border-white/20">
                   <Calendar size={28} />
                 </div>
-                <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-text">Fecha</h3>
-                <p className="text-quince-gold uppercase tracking-widest text-sm font-bold">Sábado</p>
-                <p className="text-2xl font-bold text-quince-text">23 de Mayo, 2026</p>
+                <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-white">Fecha</h3>
+                <p className="text-quince-gold-light uppercase tracking-widest text-sm font-bold">Sábado</p>
+                <p className="text-2xl font-bold text-white">23 de Mayo, 2026</p>
               </motion.div>
             </Col>
             <Col md={4}>
               <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-quince-gold text-white rounded-full flex items-center justify-center mb-4 shadow-xl">
+                <div className="w-16 h-16 bg-quince-gold text-white rounded-full flex items-center justify-center mb-4 shadow-xl border border-white/20">
                   <Clock size={28} />
                 </div>
-                <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-text">Hora</h3>
-                <p className="text-quince-gold uppercase tracking-widest text-sm font-bold">Recepción</p>
-                <p className="text-2xl font-bold text-quince-text">8:30 P.M.</p>
+                <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-white">Hora</h3>
+                <p className="text-quince-gold-light uppercase tracking-widest text-sm font-bold">Recepción</p>
+                <p className="text-2xl font-bold text-white">8:00 P.M.</p>
               </motion.div>
             </Col>
             <Col md={4}>
               <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center">
-                <div className="w-16 h-16 bg-quince-cream text-quince-gold rounded-full flex items-center justify-center mb-4 shadow-xl border border-quince-gold/20">
+                <div className="w-16 h-16 bg-white text-quince-rose rounded-full flex items-center justify-center mb-4 shadow-xl border border-quince-rose/20">
                   <MapPin size={28} />
                 </div>
-                <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-text">Lugar</h3>
-                <p className="text-quince-gold uppercase tracking-widest text-sm font-bold">Villa Luna</p>
-                <p className="text-lg font-bold text-quince-text">Via Nariño (Gira por el CAI)</p>
+                <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-white">Lugar</h3>
+                <p className="text-quince-gold-light uppercase tracking-widest text-sm font-bold">Villa Luna</p>
+                <p className="text-lg font-bold text-white">Via Nariño (Gira por el CAI)</p>
               </motion.div>
             </Col>
           </Row>
@@ -533,13 +554,34 @@ export default function App() {
       
      
 
+      {/* --- Dress Code Section --- */}
+      <section className="py-24 bg-white/10 backdrop-blur-sm relative overflow-hidden">
+        <Container className="relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="max-w-xl mx-auto p-12 rounded-[2.5rem] border-2 border-black bg-quince-gold-bg shadow-xl"
+          >
+            <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-6 text-quince-rose">Código de Vestimenta</h2>
+            <p className="font-['Playfair_Display'] italic text-2xl text-black leading-relaxed mb-6">
+              Traje Formal / Elegante
+            </p>
+            <div className="h-px w-32 bg-quince-rose mx-auto mb-6" />
+            <p className="text-xl font-bold text-quince-rose uppercase tracking-[0.2em] bg-black/10 py-4 px-6 rounded-2xl inline-block border border-black/10">
+              El color lila está reservado para la quinceañera 💜
+            </p>
+          </motion.div>
+        </Container>
+      </section>
+
       {/* --- Map Section --- */}
       <section className="py-24 bg-white/20 backdrop-blur-sm relative overflow-hidden">
          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-quince-rose/10 to-transparent" />
         <Container className="relative z-10">
           <div className="text-center mb-12">
-            <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-4 text-quince-text">¿Cómo llegar?</h2>
-            <p className="text-quince-gold font-bold uppercase tracking-widest text-xs">Te esperamos en Villa Luna para celebrar juntos.</p>
+            <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-4 text-white">¿Cómo llegar?</h2>
+            <p className="text-quince-gold-light font-bold uppercase tracking-widest text-xs">Te esperamos en Villa Luna para celebrar juntos.</p>
           </div>
           <div className="rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white h-[450px]">
             <iframe
@@ -561,9 +603,8 @@ export default function App() {
         <FlowerIcon className="absolute -bottom-20 -left-20 w-96 h-96 text-quince-gold/10 animate-spin-slow-reverse opacity-20" />
 
         <Container className="relative z-10">
-          <Gift className="mx-auto mb-6 text-quince-gold animate-bounce" size={48} />
-          <h2 className="font-['Alex_Brush'] text-8xl mb-6 text-quince-gold">Asistencia</h2>
-          <p className="font-['Playfair_Display'] italic text-2xl mb-10 text-quince-text/70">
+          <h2 className="font-['Alex_Brush'] text-8xl mb-6 text-quince-gold drop-shadow-lg">Asistencia</h2>
+          <p className="font-['Playfair_Display'] italic text-2xl mb-10 text-white/90">
             Tu presencia es nuestro mejor regalo.
           </p>
           
@@ -571,7 +612,7 @@ export default function App() {
             <Button 
                variant="light" 
                size="lg" 
-              className="px-12 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-sm bg-gradient-to-r from-pink-400 to-rose-500 text-white border-none shadow-2xl hover:scale-110 active:scale-95 transition-all"
+              className="px-12 py-4 rounded-full font-bold uppercase tracking-[0.2em] text-sm bg-gradient-to-r from-[#6d3088] to-[#8e44ad] text-white border-none shadow-2xl hover:scale-110 active:scale-95 transition-all"
                onClick={() => window.open(RSVP_LINK, '_blank')}
               >
                Confirmar Formulario
@@ -588,7 +629,8 @@ export default function App() {
             </a>
           </div>
 
-          <div className="mt-16 pt-16 border-t border-quince-gold/10 text-quince-text">
+          <div className="mt-16 pt-16 border-t border-white/20 text-white flex flex-col items-center">
+            <Gift className="mb-4 text-quince-gold animate-bounce" size={40} />
             <p className="uppercase tracking-[0.4em] text-xs opacity-50 mb-2 font-bold">Lluvia de Sobres</p>
             <p className="font-['Playfair_Display'] italic text-3xl">¡Te esperamos!</p>
           </div>
