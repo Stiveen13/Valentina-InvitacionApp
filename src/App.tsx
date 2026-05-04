@@ -259,13 +259,14 @@ const RSVPForm = () => {
 
       setStatus("✅ Confirmación enviada");
 
-      // 📲 WhatsApp
+      // 📲 WhatsApp - Usamos window.location.href para asegurar compatibilidad en móviles
       const mensaje = `🎉 Confirmación de asistencia:
 Nombre: ${nombre}
 Asistencia: ${asistira}
 Número de personas: ${numero}`;
 
-      window.open(`https://wa.me/${RSVP_PHONE}?text=${encodeURIComponent(mensaje)}`, '_blank');
+      const waUrl = `https://wa.me/${RSVP_PHONE}?text=${encodeURIComponent(mensaje)}`;
+      window.location.href = waUrl;
     } catch (error) {
       console.error("Error al enviar:", error);
       setStatus("❌ Hubo un error, intenta de nuevo");
