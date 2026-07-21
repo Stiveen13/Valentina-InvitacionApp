@@ -19,7 +19,7 @@ import {
 
 // --- Constants ---
 const EVENT_DATE = new Date('2026-09-26T20:00:00');
-const RSVP_PHONE = '573187344947';
+const RSVP_PHONE = '573205708928';
 const RSVP_CONTACT_NAME = 'Mariana Lozano Santa';
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycby8fPPLOm8YwWQpWauBah-DaUn3Gllqw-DQLmMZbKKA2ujq9Sg-QpLh4gtZfKo1KxrhhA/exec";
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1QOGxv1ZeLjrfWk6pu4IsdS1LyGfbWsIq/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Song URL
@@ -158,11 +158,11 @@ const CountdownTimer = () => {
   }, []);
 
   const TimeUnit = React.memo(({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center px-2 py-1.5 md:px-3.5 md:py-2 bg-white/40 backdrop-blur-md rounded-2xl border border-white/60 shadow-md min-w-[65px] sm:min-w-[75px] md:min-w-[95px]">
+    <div className="flex flex-col items-center px-2 py-1.5 md:px-3.5 md:py-2 bg-white/70 rounded-2xl border border-white/60 shadow-md min-w-[65px] sm:min-w-[75px] md:min-w-[95px]">
       <span className="text-xl sm:text-2xl md:text-3xl font-bold text-quince-gold tabular-nums">
         {value.toString().padStart(2, '0')}
       </span>
-      <span className="text-[9px] md:text-[11px] uppercase tracking-widest text-quince-gold-bg/90 font-bold">{label}</span>
+      <span className="text-[9px] md:text-[11px] uppercase tracking-widest text-quince-gold font-bold">{label}</span>
     </div>
   ));
 
@@ -279,7 +279,7 @@ const RSVPForm = () => {
       setStatus("✅ Confirmación enviada");
       
       // 📲 WhatsApp
-      const mensaje = `🎉 Confirmación de asistencia (15 Años de Mariana):
+      const mensaje = ` Confirmación de asistencia (15 Años de Mariana):
 Nombre: ${nombre}
 Asistencia: ${asistira}
 Número de personas: ${numero}`;
@@ -810,7 +810,7 @@ export default function App() {
 
         {/* --- Footer --- */}
         <footer className="py-10 text-center text-white/40 text-xs uppercase tracking-[0.4em] font-bold">
-          © 2026 15 Años de Mariana Lozano Santa • La Bella Durmiente
+          © 2026 15 Años de Mariana Lozano Santa • La Bella Durmiente By Stiveen13
         </footer>
       </motion.div>
     </div>
