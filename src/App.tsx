@@ -599,27 +599,19 @@ export default function App() {
               </motion.h1>
               
               <div className="flex items-center justify-center gap-3 mb-6">
-                 <div className="h-px w-12 md:w-20 bg-quince-rose/60" />
+                 <div className="h-px w-12 md:w-20 bg-[#7E1643]/50" />
                  <motion.h2 
                    initial={{ opacity: 0 }}
                    animate={{ opacity: 1 }}
                    transition={{ delay: 0.4 }}
-                   className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-quince-rose font-bold tracking-wide"
+                   className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-[#7E1643] font-black tracking-wide drop-shadow-sm"
                  >
                    Mariana Lozano Santa
                  </motion.h2>
-                 <div className="h-px w-12 md:w-20 bg-quince-rose/60" />
+                 <div className="h-px w-12 md:w-20 bg-[#7E1643]/50" />
               </div>
 
-              {/* Theme Subtitle */}
-              <div className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-quince-rose/10 border border-quince-rose/30 mb-8">
-                <Sparkles size={16} className="text-quince-rose" />
-                <span className="font-['Playfair_Display'] text-sm md:text-base font-bold text-quince-rose tracking-wider uppercase">
-                  Temática: La Bella Durmiente
-                </span>
-                <Sparkles size={16} className="text-quince-rose" />
-              </div>
-   
+
               <div className="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-2xl border border-quince-rose/20 shadow-inner mb-6 text-center">
                 <p className="font-['Playfair_Display'] italic text-lg md:text-xl text-black/85 leading-relaxed">
                   "Con gran alegría quiero invitarte a celebrar conmigo un día muy especial: mis 15 años.
@@ -664,9 +656,7 @@ export default function App() {
                 <SparklingLight className="-bottom-20 left-1/4 scale-150 blur-[3px]" />
                 <SparklingLight className="top-1/2 -right-16 scale-125 blur-[1px]" />
                 
-                <div className="absolute -bottom-10 -right-10 w-28 h-28 text-quince-gold opacity-80 animate-pulse">
-                  <RoseIcon className="w-full h-full" />
-                </div>
+
               </div>
             </div>
             
