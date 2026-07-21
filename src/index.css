@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 @theme {
-  --color-quince-rose: #6d3088;
-  --color-quince-blush: #9f20bf;
-  --color-quince-cream: #945ac2;
+  --color-quince-rose: #C75276;
+  --color-quince-blush: #FFB3C6;
+  --color-quince-lavender: #ECA8BA;
+  --color-quince-cream: #F8BBD0;
   --color-quince-gold: #D4AF37;
-  --color-quince-gold-light: #F4D03F;
-  --color-quince-gold-bg: #f9ce75;
+  --color-quince-gold-light: #FFF0C2;
+  --color-quince-gold-bg: #FFF5F8;
   --color-quince-text: #ffffff;
 }
 
 @layer base {
   body {
-    background-color: var(--color-quince-cream);
+    background-color: #ECA8BA;
     background-image: 
-      radial-gradient(at 10% 10%, #F8D7DA 0px, transparent 50%),
-      radial-gradient(at 90% 10%, #FFF9F5 0px, transparent 50%),
-      radial-gradient(at 50% 50%, #E8A8B1 0px, transparent 50%),
-      radial-gradient(at 20% 80%, #FFF9F5 0px, transparent 50%),
-      radial-gradient(at 80% 80%, #F8D7DA 0px, transparent 50%),
+      radial-gradient(at 10% 10%, #FFC2D1 0px, transparent 50%),
+      radial-gradient(at 90% 10%, #FFB3C6 0px, transparent 50%),
+      radial-gradient(at 50% 50%, #F8BBD0 0px, transparent 50%),
+      radial-gradient(at 20% 80%, #FFCAD4 0px, transparent 50%),
+      radial-gradient(at 80% 80%, #E58C9E 0px, transparent 50%),
       url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
     background-attachment: fixed;
     @apply text-quince-text;
