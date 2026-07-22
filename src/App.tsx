@@ -2,9 +2,12 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Calendar,
+  CalendarPlus,
   Clock,
+  Download,
   MapPin,
   Music,
+  Navigation,
   Pause,
   Play,
   Phone,
@@ -25,6 +28,81 @@ const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1gCsGdmQ7HW3sfSNyti
 const PHOTO_SRC = '/mariana.jpg';
 const PHOTO_WIDTH = 1086;
 const PHOTO_HEIGHT = 1448;
+
+const EVENT_END_DATE = new Date('2026-09-27T03:00:00');
+const EVENT_TITLE = '15 Años de Mariana Lozano Santa';
+const EVENT_LOCATION = 'Finca La Caleñita (Restaurante Cortesana), Tuluá, Corregimiento de Nariño';
+const EVENT_DETAILS = 'Celebración de los 15 años de Mariana Lozano Santa. Traje formal. Puntualidad: 8:00 P.M.';
+const MAPS_QUERY = 'Finca La Caleñita Restaurante Cortesana Tulua';
+
+// --- Helpers ---
+
+const MUSIC_PREF_KEY = 'quince-musica';
+
+const getMusicPreference = (): string | null => {
+  try {
+    return window.localStorage.getItem(MUSIC_PREF_KEY);
+  } catch {
+    // Safari en navegación privada lanza al tocar localStorage.
+    return null;
+  }
+};
+
+const setMusicPreference = (value: string) => {
+  try {
+    window.localStorage.setItem(MUSIC_PREF_KEY, value);
+  } catch {
+    /* preferencia no persistida, no es crítico */
+  }
+};
+
+/** Formato de fecha flotante para iCalendar y Google Calendar: 20260926T200000 */
+const toCalendarStamp = (date: Date) =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+    'T',
+    String(date.getHours()).padStart(2, '0'),
+    String(date.getMinutes()).padStart(2, '0'),
+    '00'
+  ].join('');
+
+const GOOGLE_CALENDAR_URL =
+  'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+  `&text=${encodeURIComponent(EVENT_TITLE)}` +
+  `&dates=${toCalendarStamp(EVENT_DATE)}/${toCalendarStamp(EVENT_END_DATE)}` +
+  `&details=${encodeURIComponent(EVENT_DETAILS)}` +
+  `&location=${encodeURIComponent(EVENT_LOCATION)}`;
+
+const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAPS_QUERY)}`;
+const WAZE_URL = `https://waze.com/ul?q=${encodeURIComponent(MAPS_QUERY)}&navigate=yes`;
+
+/** Genera y descarga un .ics para quien no use Google Calendar. */
+const downloadIcs = () => {
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//15 Anos Mariana//ES',
+    'BEGIN:VEVENT',
+    `UID:${toCalendarStamp(EVENT_DATE)}-mariana-15@invitacion`,
+    `DTSTAMP:${toCalendarStamp(new Date())}`,
+    `DTSTART:${toCalendarStamp(EVENT_DATE)}`,
+    `DTEND:${toCalendarStamp(EVENT_END_DATE)}`,
+    `SUMMARY:${EVENT_TITLE}`,
+    `DESCRIPTION:${EVENT_DETAILS}`,
+    `LOCATION:${EVENT_LOCATION}`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '15-anos-mariana.ics';
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 // --- Custom Sleeping Beauty Fairytale Icons ---
 
@@ -251,11 +329,15 @@ const MusicPlayer = () => {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
+        setMusicPreference('off');
       } else {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise
-            .then(() => setIsPlaying(true))
+            .then(() => {
+              setIsPlaying(true);
+              setMusicPreference('on');
+            })
             .catch(error => {
               console.error("Playback failed:", error);
               setIsPlaying(false);
@@ -267,6 +349,10 @@ const MusicPlayer = () => {
 
   useEffect(() => {
     const handleInvitationOpen = () => {
+      // Si el invitado ya silenció la música en una visita anterior, no se le
+      // vuelve a imponer: la invitación se consulta varias veces antes del día.
+      if (getMusicPreference() === 'off') return;
+
       if (audioRef.current && !isPlaying) {
         audioRef.current.play()
           .then(() => setIsPlaying(true))
@@ -279,7 +365,7 @@ const MusicPlayer = () => {
   }, [isPlaying]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-[var(--z-floating)]">
       <audio 
         ref={audioRef} 
         src={MUSIC_URL}
@@ -293,14 +379,17 @@ const MusicPlayer = () => {
         }}
       />
       <motion.button
+        type="button"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={togglePlay}
+        aria-label={isPlaying ? 'Pausar la música' : 'Reproducir la música'}
+        aria-pressed={isPlaying}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-colors duration-300 ${
           isPlaying ? 'bg-quince-gold text-quince-ink' : 'bg-white text-quince-deep border border-quince-deep/20'
         }`}
       >
-        {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
+        {isPlaying ? <Pause size={24} aria-hidden="true" /> : <Play size={24} aria-hidden="true" className="ml-1" />}
         {isPlaying && (
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
@@ -495,12 +584,24 @@ export default function App() {
   const [isOpened, setIsOpened] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
 
+  const hasOpenedRef = useRef(false);
+
+  // Se dispara cuando la carta termina de salir del sobre (delay 0.8 + 1.2 s).
+  // Antes era un setTimeout de 1800 ms, 200 ms antes de que acabara la
+  // animación, así que el sobre se desvanecía a media reproducción.
+  const handleEnvelopeDone = () => {
+    if (hasOpenedRef.current) return;
+    hasOpenedRef.current = true;
+    setIsOpened(true);
+    window.dispatchEvent(new Event('invitationOpened'));
+  };
+
   const handleOpen = () => {
     setIsOpening(true);
-    setTimeout(() => {
-      setIsOpened(true);
-      window.dispatchEvent(new Event('invitationOpened'));
-    }, 1800);
+    // Red de seguridad: si la animación se interrumpe (pestaña en segundo plano,
+    // movimiento reducido) onAnimationComplete no llega y el invitado se
+    // quedaría encerrado en el sobre. El guard hace que solo entre uno.
+    setTimeout(handleEnvelopeDone, 3000);
   };
 
   return (
@@ -526,7 +627,7 @@ export default function App() {
             key="envelope-overlay"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
-            className="fixed inset-0 z-[100] bg-[#ECA8BA] flex flex-col items-center justify-center p-4"
+            className="fixed inset-0 z-[var(--z-overlay)] bg-quince-envelope flex flex-col items-center justify-center p-4"
           >
             {!isOpening && (
               <motion.button
@@ -552,10 +653,10 @@ export default function App() {
                   <div className="absolute inset-0 bg-black/20 blur-2xl transform translate-y-8 scale-90 rounded-full" />
                   
                   {/* Cuerpo del sobre temática La Bella Durmiente */}
-                  <div className="relative w-full h-full bg-[#F8A8BD] shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
+                  <div className="relative w-full h-full bg-quince-envelope-body shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
                     {/* Solapa Superior */}
                     <div 
-                      className="absolute top-0 left-0 w-full h-1/2 bg-[#FFBCCB] border-b-4 border-quince-gold/60 shadow-md rounded-t-lg flex justify-center items-center"
+                      className="absolute top-0 left-0 w-full h-1/2 bg-quince-flap border-b-4 border-quince-gold/60 shadow-md rounded-t-lg flex justify-center items-center"
                       style={{ 
                         transformOrigin: "top", 
                         zIndex: 20,
@@ -570,15 +671,15 @@ export default function App() {
 
                     {/* Lados del sobre */}
                     <div 
-                      className="absolute inset-0 bg-[#F8A8BD]/95 border-t-2 border-quince-gold/30" 
+                      className="absolute inset-0 bg-quince-envelope-body/95 border-t-2 border-quince-gold/30" 
                       style={{ clipPath: "polygon(0 100%, 50% 50%, 100% 100%)", zIndex: 15 }}
                     />
                     <div 
-                      className="absolute inset-0 bg-[#F8A8BD]/85" 
+                      className="absolute inset-0 bg-quince-envelope-body/85" 
                       style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%)", zIndex: 10 }}
                     />
                     <div 
-                      className="absolute inset-0 bg-[#F8A8BD]/85" 
+                      className="absolute inset-0 bg-quince-envelope-body/85" 
                       style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%)", zIndex: 10 }}
                     />
                   </div>
@@ -590,12 +691,12 @@ export default function App() {
               <div className="relative w-full max-w-[450px] aspect-[4/3]">
                 <div className="absolute inset-0 bg-black/20 blur-2xl transform translate-y-8 scale-90 rounded-full" />
                 
-                <div className="relative w-full h-full bg-[#F8A8BD] shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
+                <div className="relative w-full h-full bg-quince-envelope-body shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
                   <motion.div 
                     initial={{ rotateX: 0 }}
                     animate={{ rotateX: -160 }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="absolute top-0 left-0 w-full h-1/2 bg-[#FFBCCB] border-b-4 border-quince-gold/60 shadow-md rounded-t-lg"
+                    className="absolute top-0 left-0 w-full h-1/2 bg-quince-flap border-b-4 border-quince-gold/60 shadow-md rounded-t-lg"
                     style={{ 
                       transformOrigin: "top", 
                       zIndex: 20,
@@ -608,6 +709,7 @@ export default function App() {
                     initial={{ y: 0 }}
                     animate={{ y: -60 }}
                     transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
+                    onAnimationComplete={handleEnvelopeDone}
                     className="absolute inset-x-4 bottom-4 top-8 bg-white/95 shadow-inner p-4 flex flex-col items-center justify-center border-2 border-quince-gold rounded-t-lg"
                   >
                     <CrownIcon className="text-quince-rose mb-2 w-10 h-10 animate-pulse" />
@@ -616,15 +718,15 @@ export default function App() {
                   </motion.div>
 
                   <div 
-                    className="absolute inset-0 bg-[#F8A8BD]/95 border-t-2 border-quince-gold/30" 
+                    className="absolute inset-0 bg-quince-envelope-body/95 border-t-2 border-quince-gold/30" 
                     style={{ clipPath: "polygon(0 100%, 50% 50%, 100% 100%)", zIndex: 15 }}
                   />
                   <div 
-                    className="absolute inset-0 bg-[#F8A8BD]/85" 
+                    className="absolute inset-0 bg-quince-envelope-body/85" 
                     style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%)", zIndex: 10 }}
                   />
                   <div 
-                    className="absolute inset-0 bg-[#F8A8BD]/85" 
+                    className="absolute inset-0 bg-quince-envelope-body/85" 
                     style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%)", zIndex: 10 }}
                   />
                 </div>
@@ -634,31 +736,32 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <motion.div
+      <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: isOpened ? 1 : 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
+        aria-hidden={!isOpened}
       >
         {/* --- Hero Section --- */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center isolate overflow-hidden">
+        <section aria-label="Invitación" className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center isolate overflow-hidden">
           {/* WatercolorBackground vive en la raíz y ya es position: fixed —
               renderizarlo también aquí duplicaba los blur() y las chispas. */}
           <HeroGlow />
 
           <motion.div
-            className="relative max-w-4xl w-full z-10 p-8 md:p-20 flex flex-col items-center justify-center min-h-[750px] bg-quince-gold-bg/95 backdrop-blur-md shadow-[0_30px_70px_rgba(0,0,0,0.4)] border-x-4 border-quince-gold/40 rounded-3xl my-8"
+            className="relative max-w-4xl w-full z-[var(--z-content)] p-8 md:p-20 flex flex-col items-center justify-center min-h-[min(750px,90svh)] bg-quince-gold-bg/95 backdrop-blur-md shadow-[0_30px_70px_rgba(0,0,0,0.4)] border-x-4 border-quince-gold/40 rounded-3xl my-8"
             style={{
               backgroundImage: 'linear-gradient(to right, rgba(212,175,55,0.08) 0%, transparent 12%, transparent 88%, rgba(212,175,55,0.08) 100%)'
             }}
           >
             {/* Scroll Top Roll */}
-            <div className="absolute -top-4 left-[-10px] right-[-10px] h-10 bg-[#e0bc7a] rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
+            <div className="absolute -top-4 left-[-10px] right-[-10px] h-10 bg-quince-scroll rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
               <div className="w-4 h-8 bg-black/20 rounded-full" />
               <div className="w-4 h-8 bg-black/20 rounded-full" />
             </div>
 
             {/* Scroll Bottom Roll */}
-            <div className="absolute -bottom-4 left-[-10px] right-[-10px] h-10 bg-[#e0bc7a] rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
+            <div className="absolute -bottom-4 left-[-10px] right-[-10px] h-10 bg-quince-scroll rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
               <div className="w-4 h-8 bg-black/20 rounded-full" />
               <div className="w-4 h-8 bg-black/20 rounded-full" />
             </div>
@@ -693,21 +796,21 @@ export default function App() {
               </motion.h1>
               
               <div className="flex items-center justify-center gap-3 mb-6">
-                 <div className="h-px w-12 md:w-20 bg-[#7E1643]/50" />
+                 <div className="h-px w-12 md:w-20 bg-quince-deep/50" />
                  <motion.h2 
                    initial={{ opacity: 0 }}
                    animate={{ opacity: 1 }}
                    transition={{ delay: 0.4 }}
-                   className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-[#7E1643] font-black tracking-wide drop-shadow-sm"
+                   className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-quince-deep font-black tracking-wide drop-shadow-sm"
                  >
                    Mariana Lozano Santa
                  </motion.h2>
-                 <div className="h-px w-12 md:w-20 bg-[#7E1643]/50" />
+                 <div className="h-px w-12 md:w-20 bg-quince-deep/50" />
               </div>
 
 
               <div className="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-2xl border border-quince-rose/20 shadow-inner mb-6 text-center">
-                <p className="font-['Playfair_Display'] italic text-lg md:text-xl text-black/85 leading-relaxed">
+                <p className="font-['Playfair_Display'] italic text-lg md:text-xl text-quince-ink/90 leading-relaxed">
                   "Con gran alegría quiero invitarte a celebrar conmigo un día muy especial: mis 15 años.
                   <br /><br />
                   Será una noche llena de emociones, sueños, música y momentos inolvidables. Tu compañía hará que esta fecha sea aún más especial para mí. Espero contar con tu presencia para compartir juntos esta hermosa celebración."
@@ -720,7 +823,7 @@ export default function App() {
         </section>
 
         {/* --- Fairytale Photo Section --- */}
-        <section id="foto-section" className="py-20 relative overflow-hidden bg-white/10 backdrop-blur-[2px]">
+        <section id="foto-section" aria-label="Galería" className="py-20 relative overflow-hidden bg-white/10 backdrop-blur-[2px]">
           <div className="w-full">
             <div className="max-w-[95vw] md:max-w-3xl mx-auto px-2">
               <div className="relative aspect-[3/5] md:aspect-[4/5] w-full">
@@ -758,7 +861,7 @@ export default function App() {
         </section>
 
         {/* --- Details Section --- */}
-        <section className="py-20 bg-white/30 backdrop-blur-md relative border-y border-quince-gold/20 overflow-hidden">
+        <section aria-label="Detalles del evento" className="py-20 bg-white/30 backdrop-blur-md relative border-y border-quince-gold/20 overflow-hidden">
           <div className="mx-auto w-full max-w-6xl px-3">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center">
               {/* Fecha */}
@@ -802,11 +905,32 @@ export default function App() {
                 </motion.div>
               </div>
             </div>
+
+            {/* Agendar: evita el clásico "¿a qué hora era?" días antes. */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={GOOGLE_CALENDAR_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-quince-deep hover:bg-quince-ink text-white font-bold px-6 py-3 rounded-full shadow-lg transition-colors"
+              >
+                <CalendarPlus size={20} aria-hidden="true" />
+                Agregar a Google Calendar
+              </a>
+              <button
+                type="button"
+                onClick={downloadIcs}
+                className="inline-flex items-center gap-2 bg-white/70 hover:bg-white text-quince-ink font-bold px-6 py-3 rounded-full border border-white/70 shadow-lg transition-colors"
+              >
+                <Download size={20} aria-hidden="true" />
+                Descargar invitación (.ics)
+              </button>
+            </div>
           </div>
         </section>
 
         {/* --- Location Map Section --- */}
-        <section className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
+        <section aria-label="Cómo llegar" className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-quince-rose/10 to-transparent" />
           <div className="relative z-10 mx-auto w-full max-w-6xl px-3">
             <div className="text-center mb-10">
@@ -826,18 +950,40 @@ export default function App() {
                 title="Ubicación Finca La Caleñita"
               ></iframe>
             </div>
+
+            {/* El iframe no permite arrancar la navegación desde el móvil. */}
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-quince-deep hover:bg-quince-ink text-white font-bold px-6 py-3 rounded-full shadow-lg transition-colors"
+              >
+                <Navigation size={20} aria-hidden="true" />
+                Abrir en Google Maps
+              </a>
+              <a
+                href={WAZE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/70 hover:bg-white text-quince-ink font-bold px-6 py-3 rounded-full border border-white/70 shadow-lg transition-colors"
+              >
+                <Navigation size={20} aria-hidden="true" />
+                Abrir en Waze
+              </a>
+            </div>
           </div>
         </section>
 
         {/* --- Dress Code Section --- */}
-        <section className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
+        <section aria-label="Código de vestimenta" className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
           <div className="relative z-10 mx-auto w-full max-w-6xl px-3 text-center">
-            <div className="max-w-xl mx-auto p-10 md:p-12 rounded-[2.5rem] border-2 border-quince-gold/40 bg-quince-gold-bg/95 shadow-xl text-black">
+            <div className="max-w-xl mx-auto p-10 md:p-12 rounded-[2.5rem] border-2 border-quince-gold/40 bg-quince-gold-bg/95 shadow-xl text-quince-ink">
               <div className="flex justify-center mb-3">
                 <CrownIcon className="w-12 h-12 text-quince-rose" />
               </div>
               <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-4 text-quince-rose">Código de Vestimenta</h2>
-              <p className="font-['Playfair_Display'] italic text-3xl font-bold text-black mb-4">
+              <p className="font-['Playfair_Display'] italic text-3xl font-bold text-quince-ink mb-4">
                 Traje Formal
               </p>
               <div className="h-px w-28 bg-quince-rose/40 mx-auto mb-5" />
@@ -849,7 +995,7 @@ export default function App() {
         </section>
 
         {/* --- RSVP & Envelope / Gifts Section --- */}
-        <section className="py-20 relative overflow-hidden text-center isolate">
+        <section aria-label="Confirmación de asistencia" className="py-20 relative overflow-hidden text-center isolate">
           <div className="absolute inset-0 bg-quince-cream/70 backdrop-blur-[2px]" />
           
           <div className="relative z-10 mx-auto w-full max-w-6xl px-3">
@@ -889,7 +1035,7 @@ export default function App() {
         <footer className="py-10 text-center text-quince-ink/70 text-xs uppercase tracking-[0.4em] font-bold">
           © 2026 15 Años de Mariana Lozano Santa • La Bella Durmiente By Stiveen13
         </footer>
-      </motion.div>
+      </motion.main>
     </div>
   );
 }
