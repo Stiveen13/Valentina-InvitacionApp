@@ -8,21 +8,50 @@
   --color-quince-gold: #D4AF37;
   --color-quince-gold-light: #FFF0C2;
   --color-quince-gold-bg: #FFF5F8;
-  --color-quince-text: #ffffff;
+
+  /* Texto. Sobre los fondos rosados de la invitación el blanco da 1.8:1 —
+     muy por debajo del 4.5:1 que exige WCAG AA. Estos dos granates pasan
+     holgadamente (ink ≈ 8.4:1, deep ≈ 5.6:1 sobre #ECA8BA) y mantienen la
+     paleta. Reservar el blanco para superficies oscuras. */
+  --color-quince-ink: #4A1027;
+  --color-quince-deep: #7E1643;
+  --color-quince-text: #4A1027;
 }
 
 @layer base {
   body {
     background-color: #ECA8BA;
-    background-image: 
+    @apply text-quince-text;
+  }
+
+  /* El degradado vivía en body con background-attachment: fixed, que obliga a
+     repintar el fondo completo en cada frame de scroll (tirones notorios en iOS
+     Safari y Android de gama media, sumados a los backdrop-blur de las
+     secciones). Ahora lo pinta la capa .quince-bg, que ya es position: fixed. */
+  .quince-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
       radial-gradient(at 10% 10%, #FFC2D1 0px, transparent 50%),
       radial-gradient(at 90% 10%, #FFB3C6 0px, transparent 50%),
       radial-gradient(at 50% 50%, #F8BBD0 0px, transparent 50%),
       radial-gradient(at 20% 80%, #FFCAD4 0px, transparent 50%),
       radial-gradient(at 80% 80%, #E58C9E 0px, transparent 50%),
       url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-    background-attachment: fixed;
-    @apply text-quince-text;
+  }
+}
+
+/* Respeta la preferencia del sistema: sin esto las animaciones en bucle
+   infinito (partículas, chispas, flotar) no se pueden desactivar. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
