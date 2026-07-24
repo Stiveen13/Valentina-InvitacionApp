@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Carousel, Container, Row, Col, Button } from 'react-bootstrap';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  Music, 
-  Pause, 
-  Play, 
-  Heart, 
-  ChevronDown,
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import {
+  Calendar,
+  CalendarPlus,
+  Clock,
+  Download,
+  MapPin,
+  Music,
+  Navigation,
+  Pause,
+  Play,
   Phone,
   Gift,
-  Sparkles,
   AlertCircle,
   Crown
 } from 'lucide-react';
@@ -23,6 +22,87 @@ const RSVP_PHONE = '573205708928';
 const RSVP_CONTACT_NAME = 'Mariana Lozano Santa';
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycby8fPPLOm8YwWQpWauBah-DaUn3Gllqw-DQLmMZbKKA2ujq9Sg-QpLh4gtZfKo1KxrhhA/exec";
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1gCsGdmQ7HW3sfSNytiWDwh1VP9zK5wmG/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Song URL
+
+// Foto servida desde public/ en lugar de hotlink a Google Drive: 324 KB en JPEG
+// frente a los 2.78 MB del PNG original, y sin depender de una URL ajena.
+const PHOTO_SRC = '/mariana.jpg';
+const PHOTO_WIDTH = 1086;
+const PHOTO_HEIGHT = 1448;
+
+const EVENT_END_DATE = new Date('2026-09-27T03:00:00');
+const EVENT_TITLE = '15 Años de Mariana Lozano Santa';
+const EVENT_LOCATION = 'Finca La Caleñita (Restaurante Cortesana), Tuluá, Corregimiento de Nariño';
+const EVENT_DETAILS = 'Celebración de los 15 años de Mariana Lozano Santa. Traje formal. Puntualidad: 8:00 P.M.';
+const MAPS_QUERY = 'Finca La Caleñita Restaurante Cortesana Tulua';
+
+// --- Helpers ---
+
+const MUSIC_PREF_KEY = 'quince-musica';
+
+const getMusicPreference = (): string | null => {
+  try {
+    return window.localStorage.getItem(MUSIC_PREF_KEY);
+  } catch {
+    // Safari en navegación privada lanza al tocar localStorage.
+    return null;
+  }
+};
+
+const setMusicPreference = (value: string) => {
+  try {
+    window.localStorage.setItem(MUSIC_PREF_KEY, value);
+  } catch {
+    /* preferencia no persistida, no es crítico */
+  }
+};
+
+/** Formato de fecha flotante para iCalendar y Google Calendar: 20260926T200000 */
+const toCalendarStamp = (date: Date) =>
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+    'T',
+    String(date.getHours()).padStart(2, '0'),
+    String(date.getMinutes()).padStart(2, '0'),
+    '00'
+  ].join('');
+
+const GOOGLE_CALENDAR_URL =
+  'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+  `&text=${encodeURIComponent(EVENT_TITLE)}` +
+  `&dates=${toCalendarStamp(EVENT_DATE)}/${toCalendarStamp(EVENT_END_DATE)}` +
+  `&details=${encodeURIComponent(EVENT_DETAILS)}` +
+  `&location=${encodeURIComponent(EVENT_LOCATION)}`;
+
+const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(MAPS_QUERY)}`;
+const WAZE_URL = `https://waze.com/ul?q=${encodeURIComponent(MAPS_QUERY)}&navigate=yes`;
+
+/** Genera y descarga un .ics para quien no use Google Calendar. */
+const downloadIcs = () => {
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//15 Anos Mariana//ES',
+    'BEGIN:VEVENT',
+    `UID:${toCalendarStamp(EVENT_DATE)}-mariana-15@invitacion`,
+    `DTSTAMP:${toCalendarStamp(new Date())}`,
+    `DTSTART:${toCalendarStamp(EVENT_DATE)}`,
+    `DTEND:${toCalendarStamp(EVENT_END_DATE)}`,
+    `SUMMARY:${EVENT_TITLE}`,
+    `DESCRIPTION:${EVENT_DETAILS}`,
+    `LOCATION:${EVENT_LOCATION}`,
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n');
+
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '15-anos-mariana.ics';
+  link.click();
+  URL.revokeObjectURL(url);
+};
 
 // --- Custom Sleeping Beauty Fairytale Icons ---
 
@@ -57,78 +137,151 @@ const RoseIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
   </svg>
 );
 
-const WatercolorBackground = () => (
-  <div className="quince-bg pointer-events-none">
-    <div className="brush-stroke w-[600px] h-[600px] bg-quince-rose/30 -top-20 -left-20" />
-    <div className="brush-stroke w-[500px] h-[500px] bg-quince-blush/30 top-1/4 -right-10" />
-    <div className="brush-stroke w-[700px] h-[700px] bg-quince-lavender/40 -bottom-20 left-10" />
-    <div className="brush-stroke w-[400px] h-[400px] bg-quince-rose/20 bottom-1/4 right-1/4" />
-    
-    {[...Array(25)].map((_, i) => (
-      <div 
-        key={i} 
-        className="gold-sparkle"
-        style={{
-          top: `${Math.random() * 100}%`,
-          left: `${Math.random() * 100}%`,
-          animationDelay: `${Math.random() * 5}s`
-        }}
-      />
-    ))}
-  </div>
-);
+const WatercolorBackground = () => {
+  const reduceMotion = useReducedMotion();
 
-const SparklingLight = ({ className }: { className?: string }) => (
-  <motion.div
-    animate={{ 
-      x: [0, Math.random() * 100 - 50, Math.random() * 100 - 50, 0],
-      y: [0, Math.random() * 150 - 75, Math.random() * 150 - 75, 0],
-      opacity: [0.4, 1, 0.4, 0.8, 0.4],
-      scale: [1, 1.5, 1, 1.2, 1]
-    }}
-    transition={{ 
-      duration: 10 + Math.random() * 10, 
-      repeat: Infinity,
-      ease: "easeInOut"
-    }}
-    className={`absolute w-3 h-3 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.9),0_0_30px_rgba(212,175,55,0.5)] blur-[1px] ${className}`}
-  />
-);
+  // Se calculan una sola vez: con Math.random() en el cuerpo del render las
+  // posiciones cambiaban en cada re-render y las animaciones daban saltos.
+  const sparkles = useMemo(
+    () => [...Array(12)].map(() => ({
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`,
+      animationDelay: `${Math.random() * 5}s`
+    })),
+    []
+  );
 
-const MagicDust = () => (
-  <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    {[...Array(30)].map((_, i) => (
-      <motion.div
-        key={i}
-        initial={{ 
-          x: `${Math.random() * 100}vw`, 
-          y: `${Math.random() * 100}vh`,
-          opacity: 0 
-        }}
-        animate={{ 
-          x: [
-            `${Math.random() * 100}vw`, 
-            `${Math.random() * 100}vw`, 
-            `${Math.random() * 100}vw`
-          ],
-          y: [
-            `${Math.random() * 100}vh`, 
-            `${Math.random() * 100}vh`, 
-            `${Math.random() * 100}vh`
-          ],
-          opacity: [0, 0.8, 0.2, 0.8, 0],
-          scale: [0.5, 1.6, 0.5, 1.6, 0.5]
-        }}
-        transition={{ 
-          duration: 15 + Math.random() * 25, 
-          repeat: Infinity,
-          ease: "linear"
-        }}
-        className="absolute w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white,0_0_15px_rgba(212,175,55,0.5)]"
-      />
-    ))}
+  return (
+    <div className="quince-bg pointer-events-none">
+      <div className="brush-stroke w-[600px] h-[600px] bg-quince-rose/30 -top-20 -left-20" />
+      <div className="brush-stroke w-[500px] h-[500px] bg-quince-blush/30 top-1/4 -right-10" />
+      <div className="brush-stroke w-[700px] h-[700px] bg-quince-lavender/40 -bottom-20 left-10" />
+      <div className="brush-stroke w-[400px] h-[400px] bg-quince-rose/20 bottom-1/4 right-1/4" />
+
+      {!reduceMotion && sparkles.map((style, i) => (
+        <div key={i} className="gold-sparkle" style={style} />
+      ))}
+    </div>
+  );
+};
+
+const SparklingLight = ({ className }: { className?: string }) => {
+  const reduceMotion = useReducedMotion();
+
+  const drift = useMemo(() => ({
+    x: [0, Math.random() * 100 - 50, Math.random() * 100 - 50, 0],
+    y: [0, Math.random() * 150 - 75, Math.random() * 150 - 75, 0],
+    duration: 10 + Math.random() * 10
+  }), []);
+
+  if (reduceMotion) return null;
+
+  return (
+    <motion.div
+      animate={{
+        x: drift.x,
+        y: drift.y,
+        opacity: [0.4, 1, 0.4, 0.8, 0.4],
+        scale: [1, 1.5, 1, 1.2, 1]
+      }}
+      transition={{
+        duration: drift.duration,
+        repeat: Infinity,
+        ease: "easeInOut"
+      }}
+      className={`absolute w-3 h-3 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.9),0_0_30px_rgba(212,175,55,0.5)] blur-[1px] ${className}`}
+    />
+  );
+};
+
+const MagicDust = () => {
+  const reduceMotion = useReducedMotion();
+
+  const motes = useMemo(
+    () => [...Array(12)].map(() => ({
+      startX: `${Math.random() * 100}vw`,
+      startY: `${Math.random() * 100}vh`,
+      x: [`${Math.random() * 100}vw`, `${Math.random() * 100}vw`, `${Math.random() * 100}vw`],
+      y: [`${Math.random() * 100}vh`, `${Math.random() * 100}vh`, `${Math.random() * 100}vh`],
+      duration: 15 + Math.random() * 25
+    })),
+    []
+  );
+
+  if (reduceMotion) return null;
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {motes.map((mote, i) => (
+        <motion.div
+          key={i}
+          initial={{ x: mote.startX, y: mote.startY, opacity: 0 }}
+          animate={{
+            x: mote.x,
+            y: mote.y,
+            opacity: [0, 0.8, 0.2, 0.8, 0],
+            scale: [0.5, 1.6, 0.5, 1.6, 0.5]
+          }}
+          transition={{
+            duration: mote.duration,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_10px_white,0_0_15px_rgba(212,175,55,0.5)]"
+        />
+      ))}
+    </div>
+  );
+};
+
+// Definido fuera de CountdownTimer a propósito: dentro del padre se creaba un
+// tipo de componente nuevo en cada tick, React remontaba los cuatro bloques
+// cada segundo y el memo no servía de nada.
+const TimeUnit = React.memo(({ value, label }: { value: number; label: string }) => (
+  <div className="flex flex-col items-center px-2 py-1.5 md:px-3.5 md:py-2 bg-white/70 rounded-2xl border border-white/60 shadow-md min-w-[65px] sm:min-w-[75px] md:min-w-[95px]">
+    <span className="text-xl sm:text-2xl md:text-3xl font-bold text-quince-deep tabular-nums">
+      {value.toString().padStart(2, '0')}
+    </span>
+    <span className="text-[9px] md:text-[11px] uppercase tracking-widest text-quince-deep font-bold">{label}</span>
   </div>
-);
+));
+
+const HeroGlow = () => {
+  const reduceMotion = useReducedMotion();
+
+  const glows = useMemo(
+    () => [...Array(5)].map(() => ({
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 2,
+      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 100}%`
+    })),
+    []
+  );
+
+  if (reduceMotion) return null;
+
+  return (
+    <>
+      {glows.map((glow, i) => (
+        <motion.div
+          key={i}
+          animate={{
+            opacity: [0.15, 0.35, 0.15],
+            scale: [1, 1.25, 1]
+          }}
+          transition={{
+            duration: glow.duration,
+            repeat: Infinity,
+            delay: glow.delay
+          }}
+          className="absolute w-32 h-32 rounded-full bg-quince-gold-light/20 blur-3xl pointer-events-none"
+          style={{ top: glow.top, left: glow.left }}
+        />
+      ))}
+    </>
+  );
+};
 
 const CountdownTimer = () => {
   const calculateTimeLeft = () => {
@@ -157,15 +310,6 @@ const CountdownTimer = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const TimeUnit = React.memo(({ value, label }: { value: number; label: string }) => (
-    <div className="flex flex-col items-center px-2 py-1.5 md:px-3.5 md:py-2 bg-white/70 rounded-2xl border border-white/60 shadow-md min-w-[65px] sm:min-w-[75px] md:min-w-[95px]">
-      <span className="text-xl sm:text-2xl md:text-3xl font-bold text-quince-gold tabular-nums">
-        {value.toString().padStart(2, '0')}
-      </span>
-      <span className="text-[9px] md:text-[11px] uppercase tracking-widest text-quince-gold font-bold">{label}</span>
-    </div>
-  ));
-
   return (
     <div className="flex gap-1.5 sm:gap-2 md:gap-3 justify-center mt-8 relative z-10 w-full px-1">
       <TimeUnit value={timeLeft.days} label="Días" />
@@ -185,11 +329,15 @@ const MusicPlayer = () => {
       if (isPlaying) {
         audioRef.current.pause();
         setIsPlaying(false);
+        setMusicPreference('off');
       } else {
         const playPromise = audioRef.current.play();
         if (playPromise !== undefined) {
           playPromise
-            .then(() => setIsPlaying(true))
+            .then(() => {
+              setIsPlaying(true);
+              setMusicPreference('on');
+            })
             .catch(error => {
               console.error("Playback failed:", error);
               setIsPlaying(false);
@@ -201,6 +349,10 @@ const MusicPlayer = () => {
 
   useEffect(() => {
     const handleInvitationOpen = () => {
+      // Si el invitado ya silenció la música en una visita anterior, no se le
+      // vuelve a imponer: la invitación se consulta varias veces antes del día.
+      if (getMusicPreference() === 'off') return;
+
       if (audioRef.current && !isPlaying) {
         audioRef.current.play()
           .then(() => setIsPlaying(true))
@@ -213,7 +365,7 @@ const MusicPlayer = () => {
   }, [isPlaying]);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 right-6 z-[var(--z-floating)]">
       <audio 
         ref={audioRef} 
         src={MUSIC_URL}
@@ -227,14 +379,17 @@ const MusicPlayer = () => {
         }}
       />
       <motion.button
+        type="button"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
         onClick={togglePlay}
+        aria-label={isPlaying ? 'Pausar la música' : 'Reproducir la música'}
+        aria-pressed={isPlaying}
         className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-colors duration-300 ${
-          isPlaying ? 'bg-quince-gold text-white' : 'bg-white text-quince-gold border border-quince-gold/20'
+          isPlaying ? 'bg-quince-gold text-quince-ink' : 'bg-white text-quince-deep border border-quince-deep/20'
         }`}
       >
-        {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
+        {isPlaying ? <Pause size={24} aria-hidden="true" /> : <Play size={24} aria-hidden="true" className="ml-1" />}
         {isPlaying && (
           <motion.div
             animate={{ scale: [1, 1.2, 1] }}
@@ -249,24 +404,39 @@ const MusicPlayer = () => {
   );
 };
 
+const FIELD_CLASS = "w-full p-3.5 rounded-xl bg-white/90 border border-white/60 focus:ring-2 focus:ring-quince-deep outline-none text-quince-ink placeholder-quince-ink/50 font-medium transition-all";
+const LABEL_CLASS = "block text-quince-ink font-bold mb-1.5 text-xs uppercase tracking-wider";
+
 const RSVPForm = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     asistira: '',
     numero: ''
   });
+  const [errors, setErrors] = useState<Partial<Record<keyof typeof formData, string>>>({});
   const [status, setStatus] = useState('');
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [waUrl, setWaUrl] = useState('');
 
-  const handleEnviar = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     const { nombre, asistira, numero } = formData;
+    const nextErrors: typeof errors = {};
+    if (!nombre.trim()) nextErrors.nombre = "Escribe tu nombre y apellido";
+    if (!asistira) nextErrors.asistira = "Indícanos si podrás acompañarnos";
+    if (!numero) nextErrors.numero = "Selecciona cuántas personas asistirán";
 
-    if (!nombre || !asistira || !numero) {
-      alert("Por favor completa todos los campos");
-      return;
-    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
+    setIsSending(true);
     setStatus("Enviando...");
+
+    const mensaje = ` Confirmación de asistencia (15 Años de Mariana):
+Nombre: ${nombre}
+Asistencia: ${asistira}
+Número de personas: ${numero}`;
 
     try {
       // 🔥 Guardar en Google Sheets
@@ -276,111 +446,137 @@ const RSVPForm = () => {
         body: JSON.stringify(formData)
       });
 
-      setStatus("✅ Confirmación enviada");
-      
-      // 📲 WhatsApp
-      const mensaje = ` Confirmación de asistencia (15 Años de Mariana):
-Nombre: ${nombre}
-Asistencia: ${asistira}
-Número de personas: ${numero}`;
-
-      const waUrl = `https://wa.me/${RSVP_PHONE}?text=${encodeURIComponent(mensaje)}`;
-      
-      setTimeout(() => {
-        setIsSubmitted(true);
-        window.location.href = waUrl;
-      }, 1000);
-
+      // 📲 WhatsApp: se ofrece como enlace en la pantalla de éxito en lugar de
+      // navegar con window.location, que descartaba la confirmación en pantalla.
+      setWaUrl(`https://wa.me/${RSVP_PHONE}?text=${encodeURIComponent(mensaje)}`);
     } catch (error) {
       console.error("Error al enviar:", error);
       setStatus("❌ Hubo un error, intenta de nuevo");
+      setIsSending(false);
     }
   };
 
-  if (isSubmitted) {
+  if (waUrl) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="max-w-md mx-auto bg-white/20 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10 text-center"
+        className="max-w-md mx-auto bg-white/30 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10 text-center"
       >
-        <div className="w-20 h-20 bg-[#25D366] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+        <div className="w-20 h-20 bg-quince-deep rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
           <span className="text-4xl">✅</span>
         </div>
-        <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-2 text-white">¡Gracias por confirmar!</h3>
-        <p className="text-white/90 italic">Tu respuesta ha sido registrada. ¡Mariana te espera para celebrar juntos!</p>
+        <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-2 text-quince-ink">¡Gracias por confirmar!</h3>
+        <p className="text-quince-ink/90 italic mb-6">Tu respuesta ha sido registrada. ¡Mariana te espera para celebrar juntos!</p>
+        <a
+          href={waUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full bg-quince-deep hover:bg-quince-ink text-white py-4 rounded-xl font-bold shadow-xl flex items-center justify-center gap-2 text-base"
+        >
+          <Phone size={20} />
+          Avisar también por WhatsApp
+        </a>
       </motion.div>
     );
   }
 
   return (
-    <div className="max-w-md mx-auto bg-white/20 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10">
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      aria-labelledby="rsvp-titulo"
+      className="max-w-md mx-auto bg-white/30 backdrop-blur-md p-8 rounded-[2.5rem] border border-white/40 shadow-2xl mt-10"
+    >
       <div className="flex justify-center mb-3">
-        <CrownIcon className="w-10 h-10 text-quince-gold animate-bounce" />
+        <CrownIcon className="w-10 h-10 text-quince-deep animate-bounce" />
       </div>
-      <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-2 text-white">🎉 ¡Queremos celebrar contigo!</h3>
-      <p className="text-white/90 mb-4 italic text-sm">Confirma tu asistencia completando el siguiente formulario</p>
-      
+      <h3 id="rsvp-titulo" className="font-['Playfair_Display'] text-2xl font-bold mb-2 text-quince-ink">🎉 ¡Queremos celebrar contigo!</h3>
+      <p className="text-quince-ink/90 mb-4 italic text-sm">Confirma tu asistencia completando el siguiente formulario</p>
+
       {/* RSVP Deadline Notice */}
-      <div className="mb-6 bg-white/30 backdrop-blur-sm p-3 rounded-2xl border border-quince-gold/40 text-white text-xs font-bold flex items-center justify-center gap-2">
-        <AlertCircle size={16} className="text-quince-gold-light shrink-0" />
+      <div className="mb-6 bg-white/50 backdrop-blur-sm p-3 rounded-2xl border border-quince-deep/30 text-quince-ink text-xs font-bold flex items-center justify-center gap-2">
+        <AlertCircle size={16} className="text-quince-deep shrink-0" />
         <span>Fecha límite para confirmar: <strong>Viernes 18 de septiembre</strong></span>
       </div>
 
       <div className="space-y-5 text-left">
         <div>
-          <label className="block text-white font-bold mb-1.5 text-xs uppercase tracking-wider">Tu nombre completo</label>
-          <input 
+          <label htmlFor="rsvp-nombre" className={LABEL_CLASS}>Tu nombre completo</label>
+          <input
+            id="rsvp-nombre"
+            name="nombre"
             type="text"
-            placeholder="Escribe tu nombre y apellido" 
+            autoComplete="name"
+            placeholder="Escribe tu nombre y apellido"
             value={formData.nombre}
             onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-            className="w-full p-3.5 rounded-xl bg-white/80 border border-white/60 focus:ring-2 focus:ring-quince-gold outline-none text-black placeholder-black/50 font-medium"
+            aria-invalid={!!errors.nombre}
+            aria-describedby={errors.nombre ? "rsvp-nombre-error" : undefined}
+            className={FIELD_CLASS}
           />
+          {errors.nombre && (
+            <p id="rsvp-nombre-error" role="alert" className="mt-1.5 text-xs font-bold text-quince-deep">{errors.nombre}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-white font-bold mb-1.5 text-xs uppercase tracking-wider">¿Podrás acompañarnos?</label>
-          <select 
+          <label htmlFor="rsvp-asistira" className={LABEL_CLASS}>¿Podrás acompañarnos?</label>
+          <select
+            id="rsvp-asistira"
+            name="asistira"
             value={formData.asistira}
             onChange={(e) => setFormData({...formData, asistira: e.target.value})}
-            className="w-full p-3.5 rounded-xl bg-white/80 border border-white/60 focus:ring-2 focus:ring-quince-gold outline-none text-black font-medium transition-all"
+            aria-invalid={!!errors.asistira}
+            aria-describedby={errors.asistira ? "rsvp-asistira-error" : undefined}
+            className={FIELD_CLASS}
           >
             <option value="">Selecciona una opción</option>
             <option value="Sí, allí estaré">Sí, allí estaré</option>
             <option value="No podré asistir">No podré asistir</option>
           </select>
+          {errors.asistira && (
+            <p id="rsvp-asistira-error" role="alert" className="mt-1.5 text-xs font-bold text-quince-deep">{errors.asistira}</p>
+          )}
         </div>
 
         <div>
-          <label className="block text-white font-bold mb-1.5 text-xs uppercase tracking-wider">Número total de asistentes</label>
-          <select 
+          <label htmlFor="rsvp-numero" className={LABEL_CLASS}>Número total de asistentes</label>
+          <select
+            id="rsvp-numero"
+            name="numero"
             value={formData.numero}
             onChange={(e) => setFormData({...formData, numero: e.target.value})}
-            className="w-full p-3.5 rounded-xl bg-white/80 border border-white/60 focus:ring-2 focus:ring-quince-gold outline-none text-black font-medium transition-all"
+            aria-invalid={!!errors.numero}
+            aria-describedby={errors.numero ? "rsvp-numero-error" : undefined}
+            className={FIELD_CLASS}
           >
             <option value="">Selecciona la cantidad</option>
             {[1, 2, 3, 4, 5, 6].map(num => (
               <option key={num} value={num}>{num} {num === 1 ? 'persona' : 'personas'}</option>
             ))}
           </select>
+          {errors.numero && (
+            <p id="rsvp-numero-error" role="alert" className="mt-1.5 text-xs font-bold text-quince-deep">{errors.numero}</p>
+          )}
         </div>
 
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleEnviar}
-          className="w-full bg-[#25D366] hover:bg-[#20ba5a] text-white py-4 rounded-xl font-bold shadow-xl flex items-center justify-center gap-2 transition-transform cursor-pointer text-base mt-2"
+        <motion.button
+          type="submit"
+          whileHover={{ scale: isSending ? 1 : 1.02 }}
+          whileTap={{ scale: isSending ? 1 : 0.98 }}
+          disabled={isSending}
+          className="w-full bg-quince-deep hover:bg-quince-ink disabled:opacity-60 disabled:cursor-not-allowed text-white py-4 rounded-xl font-bold shadow-xl flex items-center justify-center gap-2 transition-transform cursor-pointer text-base mt-2"
         >
           <Phone size={20} />
-          Confirmar asistencia
+          {isSending ? 'Enviando…' : 'Confirmar asistencia'}
         </motion.button>
 
         {status && (
-          <p className="mt-3 text-white font-bold animate-pulse text-center text-sm">{status}</p>
+          <p role="status" className="mt-3 text-quince-ink font-bold text-center text-sm">{status}</p>
         )}
       </div>
-    </div>
+    </form>
   );
 };
 
@@ -388,16 +584,31 @@ export default function App() {
   const [isOpened, setIsOpened] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
 
+  const hasOpenedRef = useRef(false);
+
+  // Se dispara cuando la carta termina de salir del sobre (delay 0.8 + 1.2 s).
+  // Antes era un setTimeout de 1800 ms, 200 ms antes de que acabara la
+  // animación, así que el sobre se desvanecía a media reproducción.
+  const handleEnvelopeDone = () => {
+    if (hasOpenedRef.current) return;
+    hasOpenedRef.current = true;
+    setIsOpened(true);
+    window.dispatchEvent(new Event('invitationOpened'));
+  };
+
   const handleOpen = () => {
     setIsOpening(true);
-    setTimeout(() => {
-      setIsOpened(true);
-      window.dispatchEvent(new Event('invitationOpened'));
-    }, 1800);
+    // Red de seguridad: si la animación se interrumpe (pestaña en segundo plano,
+    // movimiento reducido) onAnimationComplete no llega y el invitado se
+    // quedaría encerrado en el sobre. El guard hace que solo entre uno.
+    setTimeout(handleEnvelopeDone, 3000);
   };
 
   return (
-    <div className="min-h-screen relative text-quince-text font-['Montserrat'] overflow-x-hidden bg-quince-cream">
+    // Sin bg-quince-cream: este div es position:relative con z-index auto, así que
+    // no crea contexto de apilamiento y su fondo opaco tapaba a .quince-bg
+    // (z-index:-1). El degradado y los brush-stroke se calculaban sin verse nunca.
+    <div className="min-h-screen relative text-quince-text font-['Montserrat'] overflow-x-hidden">
       <WatercolorBackground />
       <MagicDust />
       
@@ -416,23 +627,25 @@ export default function App() {
             key="envelope-overlay"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
-            className="fixed inset-0 z-[100] bg-[#ECA8BA] flex flex-col items-center justify-center p-4"
+            className="fixed inset-0 z-[var(--z-overlay)] bg-quince-envelope flex flex-col items-center justify-center p-4"
           >
             {!isOpening && (
-              <motion.div 
+              <motion.button
+                type="button"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 onClick={handleOpen}
-                className="flex flex-col items-center cursor-pointer"
+                aria-label="Abrir la invitación"
+                className="flex flex-col items-center cursor-pointer bg-transparent border-0 p-0 rounded-3xl focus-visible:outline-4 focus-visible:outline-offset-8 focus-visible:outline-quince-deep"
               >
-                <motion.div 
+                <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="mb-8 text-quince-gold-light font-['Playfair_Display'] italic text-2xl tracking-[0.2em] font-bold flex items-center gap-2"
+                  className="mb-8 text-quince-deep font-['Playfair_Display'] italic text-2xl tracking-[0.2em] font-bold flex items-center gap-2"
                 >
-                  <Crown size={24} className="text-quince-gold" />
+                  <Crown size={24} className="text-quince-deep" />
                   <span>Toca para abrir la invitación real</span>
-                  <Crown size={24} className="text-quince-gold" />
+                  <Crown size={24} className="text-quince-deep" />
                 </motion.div>
 
                 <div className="relative w-full max-w-[450px] aspect-[4/3]">
@@ -440,10 +653,10 @@ export default function App() {
                   <div className="absolute inset-0 bg-black/20 blur-2xl transform translate-y-8 scale-90 rounded-full" />
                   
                   {/* Cuerpo del sobre temática La Bella Durmiente */}
-                  <div className="relative w-full h-full bg-[#F8A8BD] shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
+                  <div className="relative w-full h-full bg-quince-envelope-body shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
                     {/* Solapa Superior */}
                     <div 
-                      className="absolute top-0 left-0 w-full h-1/2 bg-[#FFBCCB] border-b-4 border-quince-gold/60 shadow-md rounded-t-lg flex justify-center items-center"
+                      className="absolute top-0 left-0 w-full h-1/2 bg-quince-flap border-b-4 border-quince-gold/60 shadow-md rounded-t-lg flex justify-center items-center"
                       style={{ 
                         transformOrigin: "top", 
                         zIndex: 20,
@@ -458,32 +671,32 @@ export default function App() {
 
                     {/* Lados del sobre */}
                     <div 
-                      className="absolute inset-0 bg-[#F8A8BD]/95 border-t-2 border-quince-gold/30" 
+                      className="absolute inset-0 bg-quince-envelope-body/95 border-t-2 border-quince-gold/30" 
                       style={{ clipPath: "polygon(0 100%, 50% 50%, 100% 100%)", zIndex: 15 }}
                     />
                     <div 
-                      className="absolute inset-0 bg-[#F8A8BD]/85" 
+                      className="absolute inset-0 bg-quince-envelope-body/85" 
                       style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%)", zIndex: 10 }}
                     />
                     <div 
-                      className="absolute inset-0 bg-[#F8A8BD]/85" 
+                      className="absolute inset-0 bg-quince-envelope-body/85" 
                       style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%)", zIndex: 10 }}
                     />
                   </div>
                 </div>
-              </motion.div>
+              </motion.button>
             )}
 
             {isOpening && (
               <div className="relative w-full max-w-[450px] aspect-[4/3]">
                 <div className="absolute inset-0 bg-black/20 blur-2xl transform translate-y-8 scale-90 rounded-full" />
                 
-                <div className="relative w-full h-full bg-[#F8A8BD] shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
+                <div className="relative w-full h-full bg-quince-envelope-body shadow-2xl rounded-b-lg border-4 border-quince-gold/60 overflow-hidden">
                   <motion.div 
                     initial={{ rotateX: 0 }}
                     animate={{ rotateX: -160 }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="absolute top-0 left-0 w-full h-1/2 bg-[#FFBCCB] border-b-4 border-quince-gold/60 shadow-md rounded-t-lg"
+                    className="absolute top-0 left-0 w-full h-1/2 bg-quince-flap border-b-4 border-quince-gold/60 shadow-md rounded-t-lg"
                     style={{ 
                       transformOrigin: "top", 
                       zIndex: 20,
@@ -496,6 +709,7 @@ export default function App() {
                     initial={{ y: 0 }}
                     animate={{ y: -60 }}
                     transition={{ delay: 0.8, duration: 1.2, ease: "easeOut" }}
+                    onAnimationComplete={handleEnvelopeDone}
                     className="absolute inset-x-4 bottom-4 top-8 bg-white/95 shadow-inner p-4 flex flex-col items-center justify-center border-2 border-quince-gold rounded-t-lg"
                   >
                     <CrownIcon className="text-quince-rose mb-2 w-10 h-10 animate-pulse" />
@@ -504,15 +718,15 @@ export default function App() {
                   </motion.div>
 
                   <div 
-                    className="absolute inset-0 bg-[#F8A8BD]/95 border-t-2 border-quince-gold/30" 
+                    className="absolute inset-0 bg-quince-envelope-body/95 border-t-2 border-quince-gold/30" 
                     style={{ clipPath: "polygon(0 100%, 50% 50%, 100% 100%)", zIndex: 15 }}
                   />
                   <div 
-                    className="absolute inset-0 bg-[#F8A8BD]/85" 
+                    className="absolute inset-0 bg-quince-envelope-body/85" 
                     style={{ clipPath: "polygon(0 0, 50% 50%, 0 100%)", zIndex: 10 }}
                   />
                   <div 
-                    className="absolute inset-0 bg-[#F8A8BD]/85" 
+                    className="absolute inset-0 bg-quince-envelope-body/85" 
                     style={{ clipPath: "polygon(100% 0, 50% 50%, 100% 100%)", zIndex: 10 }}
                   />
                 </div>
@@ -522,49 +736,32 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <motion.div
+      <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: isOpened ? 1 : 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
+        aria-hidden={!isOpened}
       >
         {/* --- Hero Section --- */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center isolate overflow-hidden">
-          <WatercolorBackground />
-          
-          {[...Array(10)].map((_, i) => (
-            <motion.div
-              key={i}
-              animate={{ 
-                opacity: [0.15, 0.35, 0.15],
-                scale: [1, 1.25, 1]
-              }}
-              transition={{ 
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2
-              }}
-              className="absolute w-32 h-32 rounded-full bg-quince-gold-light/20 blur-3xl pointer-events-none"
-              style={{ 
-                top: `${Math.random() * 100}%`,
-                left: `${Math.random() * 100}%`
-              }}
-            />
-          ))}
+        <section aria-label="Invitación" className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center isolate overflow-hidden">
+          {/* WatercolorBackground vive en la raíz y ya es position: fixed —
+              renderizarlo también aquí duplicaba los blur() y las chispas. */}
+          <HeroGlow />
 
           <motion.div
-            className="relative max-w-4xl w-full z-10 p-8 md:p-20 flex flex-col items-center justify-center min-h-[750px] bg-quince-gold-bg/95 backdrop-blur-md shadow-[0_30px_70px_rgba(0,0,0,0.4)] border-x-4 border-quince-gold/40 rounded-3xl my-8"
+            className="relative max-w-4xl w-full z-[var(--z-content)] p-8 md:p-20 flex flex-col items-center justify-center min-h-[min(750px,90svh)] bg-quince-gold-bg/95 backdrop-blur-md shadow-[0_30px_70px_rgba(0,0,0,0.4)] border-x-4 border-quince-gold/40 rounded-3xl my-8"
             style={{
               backgroundImage: 'linear-gradient(to right, rgba(212,175,55,0.08) 0%, transparent 12%, transparent 88%, rgba(212,175,55,0.08) 100%)'
             }}
           >
             {/* Scroll Top Roll */}
-            <div className="absolute -top-4 left-[-10px] right-[-10px] h-10 bg-[#e0bc7a] rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
+            <div className="absolute -top-4 left-[-10px] right-[-10px] h-10 bg-quince-scroll rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
               <div className="w-4 h-8 bg-black/20 rounded-full" />
               <div className="w-4 h-8 bg-black/20 rounded-full" />
             </div>
 
             {/* Scroll Bottom Roll */}
-            <div className="absolute -bottom-4 left-[-10px] right-[-10px] h-10 bg-[#e0bc7a] rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
+            <div className="absolute -bottom-4 left-[-10px] right-[-10px] h-10 bg-quince-scroll rounded-full border-2 border-quince-gold/50 shadow-md z-20 flex items-center justify-between px-3">
               <div className="w-4 h-8 bg-black/20 rounded-full" />
               <div className="w-4 h-8 bg-black/20 rounded-full" />
             </div>
@@ -599,21 +796,21 @@ export default function App() {
               </motion.h1>
               
               <div className="flex items-center justify-center gap-3 mb-6">
-                 <div className="h-px w-12 md:w-20 bg-[#7E1643]/50" />
+                 <div className="h-px w-12 md:w-20 bg-quince-deep/50" />
                  <motion.h2 
                    initial={{ opacity: 0 }}
                    animate={{ opacity: 1 }}
                    transition={{ delay: 0.4 }}
-                   className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-[#7E1643] font-black tracking-wide drop-shadow-sm"
+                   className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-quince-deep font-black tracking-wide drop-shadow-sm"
                  >
                    Mariana Lozano Santa
                  </motion.h2>
-                 <div className="h-px w-12 md:w-20 bg-[#7E1643]/50" />
+                 <div className="h-px w-12 md:w-20 bg-quince-deep/50" />
               </div>
 
 
               <div className="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-2xl border border-quince-rose/20 shadow-inner mb-6 text-center">
-                <p className="font-['Playfair_Display'] italic text-lg md:text-xl text-black/85 leading-relaxed">
+                <p className="font-['Playfair_Display'] italic text-lg md:text-xl text-quince-ink/90 leading-relaxed">
                   "Con gran alegría quiero invitarte a celebrar conmigo un día muy especial: mis 15 años.
                   <br /><br />
                   Será una noche llena de emociones, sueños, música y momentos inolvidables. Tu compañía hará que esta fecha sea aún más especial para mí. Espero contar con tu presencia para compartir juntos esta hermosa celebración."
@@ -625,106 +822,120 @@ export default function App() {
           </motion.div>
         </section>
 
-        {/* --- Fairytale Photo Carousel Section --- */}
-        <section id="carousel-section" className="py-20 relative overflow-hidden bg-white/10 backdrop-blur-[2px]">
-          <Container fluid className="px-0">
+        {/* --- Fairytale Photo Section --- */}
+        <section id="foto-section" aria-label="Galería" className="py-20 relative overflow-hidden bg-white/10 backdrop-blur-[2px]">
+          <div className="w-full">
             <div className="max-w-[95vw] md:max-w-3xl mx-auto px-2">
               <div className="relative aspect-[3/5] md:aspect-[4/5] w-full">
                 <div className="absolute inset-0 bg-quince-blush/30 blur-[120px] rounded-full scale-110" />
-                
+
                 <div className="relative h-full w-full p-2 md:p-4">
-                  <div className="relative h-full w-full card-photo-frame border-8 border-white shadow-2xl rounded-2xl overflow-hidden">
-                    <Carousel fade indicators={false} controls={true} className="h-full">
-                      {[             
-                        "https://lh3.googleusercontent.com/d/1DRIuih9U9Oi_Lp-iP4HWscW2WXEpXB7i"
-                      ].map((src, idx) => (
-                        <Carousel.Item key={idx} className="h-full bg-[#F8A8BD]">
-                          <img 
-                            src={src} 
-                            alt={`Mariana ${idx + 1}`}
-                            className="w-full h-full object-cover opacity-90"
-                            referrerPolicy="no-referrer"
-                            style={{ filter: "contrast(1.05) saturate(1.1)" }}
-                          />
-                        </Carousel.Item>
-                      ))}
-                    </Carousel>
+                  <div className="relative h-full w-full card-photo-frame border-8 border-white shadow-2xl rounded-2xl overflow-hidden bg-quince-blush">
+                    <img
+                      src={PHOTO_SRC}
+                      width={PHOTO_WIDTH}
+                      height={PHOTO_HEIGHT}
+                      alt="Mariana Lozano Santa"
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full h-full object-cover opacity-90"
+                      style={{ filter: "contrast(1.05) saturate(1.1)" }}
+                    />
                   </div>
                 </div>
 
                 <SparklingLight className="-top-10 -left-10 scale-[2] blur-[2px]" />
                 <SparklingLight className="-bottom-20 left-1/4 scale-150 blur-[3px]" />
                 <SparklingLight className="top-1/2 -right-16 scale-125 blur-[1px]" />
-                
-
               </div>
             </div>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
-              className="mt-14 text-center font-['Playfair_Display'] italic text-2xl text-white max-w-2xl mx-auto px-4 leading-relaxed"
+              className="mt-14 text-center font-['Playfair_Display'] italic text-2xl text-quince-ink max-w-2xl mx-auto px-4 leading-relaxed"
             >
               "Gracias por formar parte de mi cuento de hadas."
             </motion.p>
-          </Container>
+          </div>
         </section>
 
         {/* --- Details Section --- */}
-        <section className="py-20 bg-white/30 backdrop-blur-md relative border-y border-quince-gold/20 overflow-hidden">
-          <Container>
-            <Row className="text-center g-4 justify-center">
+        <section aria-label="Detalles del evento" className="py-20 bg-white/30 backdrop-blur-md relative border-y border-quince-gold/20 overflow-hidden">
+          <div className="mx-auto w-full max-w-6xl px-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 text-center">
               {/* Fecha */}
-              <Col md={4} sm={6}>
+              <div>
                 <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center bg-white/20 p-6 rounded-3xl border border-white/40 shadow-lg h-full">
                   <div className="w-16 h-16 bg-quince-rose text-white rounded-full flex items-center justify-center mb-4 shadow-xl border border-white/30">
                     <Calendar size={28} />
                   </div>
-                  <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-white">Fecha</h3>
-                  <p className="text-quince-gold-light uppercase tracking-widest text-xs font-bold">Sábado</p>
-                  <p className="text-2xl font-bold text-white mt-1">26 de Septiembre</p>
+                  <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-ink">Fecha</h3>
+                  <p className="text-quince-deep uppercase tracking-widest text-xs font-bold">Sábado</p>
+                  <p className="text-2xl font-bold text-quince-ink mt-1">26 de Septiembre</p>
                 </motion.div>
-              </Col>
+              </div>
 
               {/* Horarios */}
-              <Col md={4} sm={6}>
+              <div>
                 <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center bg-white/20 p-6 rounded-3xl border border-white/40 shadow-lg h-full">
-                  <div className="w-16 h-16 bg-quince-gold text-white rounded-full flex items-center justify-center mb-4 shadow-xl border border-white/30">
+                  <div className="w-16 h-16 bg-quince-gold text-quince-ink rounded-full flex items-center justify-center mb-4 shadow-xl border border-white/30">
                     <Clock size={28} />
                   </div>
-                  <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-white">Horario</h3>
-                  <p className="text-quince-gold-light uppercase tracking-widest text-xs font-bold">Recepción & Fiesta</p>
-                  <p className="text-2xl font-bold text-white mt-1">8:00 P.M. – 3:00 A.M.</p>
-                  <div className="mt-3 bg-white/30 px-3 py-1.5 rounded-full border border-white/50 text-xs text-white font-bold inline-flex items-center gap-1.5">
-                    <AlertCircle size={14} className="text-quince-gold-light" />
+                  <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-ink">Horario</h3>
+                  <p className="text-quince-deep uppercase tracking-widest text-xs font-bold">Recepción & Fiesta</p>
+                  <p className="text-2xl font-bold text-quince-ink mt-1">8:00 P.M. – 3:00 A.M.</p>
+                  <div className="mt-3 bg-white/50 px-3 py-1.5 rounded-full border border-white/60 text-xs text-quince-ink font-bold inline-flex items-center gap-1.5">
+                    <AlertCircle size={14} className="text-quince-deep" />
                     <span>Puntualidad: 8:00 P.M.</span>
                   </div>
                 </motion.div>
-              </Col>
+              </div>
 
               {/* Lugar */}
-              <Col md={4} sm={12}>
+              <div className="sm:col-span-2 md:col-span-1">
                 <motion.div whileHover={{ y: -5 }} className="flex flex-col items-center bg-white/20 p-6 rounded-3xl border border-white/40 shadow-lg h-full">
                   <div className="w-16 h-16 bg-white text-quince-rose rounded-full flex items-center justify-center mb-4 shadow-xl border border-quince-rose/30">
                     <MapPin size={28} />
                   </div>
-                  <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-white">Lugar</h3>
-                  <p className="text-quince-gold-light uppercase tracking-widest text-xs font-bold">Finca La Caleñita</p>
-                  <p className="text-lg font-bold text-white mt-0.5">(Restaurante Cortesana)</p>
-                  <p className="text-sm text-white/90 mt-1">Tuluá, Corregimiento de Nariño</p>
+                  <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-ink">Lugar</h3>
+                  <p className="text-quince-deep uppercase tracking-widest text-xs font-bold">Finca La Caleñita</p>
+                  <p className="text-lg font-bold text-quince-ink mt-0.5">(Restaurante Cortesana)</p>
+                  <p className="text-sm text-quince-ink/90 mt-1">Tuluá, Corregimiento de Nariño</p>
                 </motion.div>
-              </Col>
-            </Row>
-          </Container>
+              </div>
+            </div>
+
+            {/* Agendar: evita el clásico "¿a qué hora era?" días antes. */}
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={GOOGLE_CALENDAR_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-quince-deep hover:bg-quince-ink text-white font-bold px-6 py-3 rounded-full shadow-lg transition-colors"
+              >
+                <CalendarPlus size={20} aria-hidden="true" />
+                Agregar a Google Calendar
+              </a>
+              <button
+                type="button"
+                onClick={downloadIcs}
+                className="inline-flex items-center gap-2 bg-white/70 hover:bg-white text-quince-ink font-bold px-6 py-3 rounded-full border border-white/70 shadow-lg transition-colors"
+              >
+                <Download size={20} aria-hidden="true" />
+                Descargar invitación (.ics)
+              </button>
+            </div>
+          </div>
         </section>
 
         {/* --- Location Map Section --- */}
-        <section className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
+        <section aria-label="Cómo llegar" className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-quince-rose/10 to-transparent" />
-          <Container className="relative z-10">
+          <div className="relative z-10 mx-auto w-full max-w-6xl px-3">
             <div className="text-center mb-10">
-              <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-3 text-white">¿Cómo llegar?</h2>
-              <p className="text-quince-gold-light font-bold uppercase tracking-widest text-xs">
+              <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-3 text-quince-ink">¿Cómo llegar?</h2>
+              <p className="text-quince-deep font-bold uppercase tracking-widest text-xs">
                 Finca La Caleñita (Restaurante Cortesana) • Tuluá, Corregimiento de Nariño
               </p>
             </div>
@@ -739,18 +950,40 @@ export default function App() {
                 title="Ubicación Finca La Caleñita"
               ></iframe>
             </div>
-          </Container>
+
+            {/* El iframe no permite arrancar la navegación desde el móvil. */}
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <a
+                href={MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-quince-deep hover:bg-quince-ink text-white font-bold px-6 py-3 rounded-full shadow-lg transition-colors"
+              >
+                <Navigation size={20} aria-hidden="true" />
+                Abrir en Google Maps
+              </a>
+              <a
+                href={WAZE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white/70 hover:bg-white text-quince-ink font-bold px-6 py-3 rounded-full border border-white/70 shadow-lg transition-colors"
+              >
+                <Navigation size={20} aria-hidden="true" />
+                Abrir en Waze
+              </a>
+            </div>
+          </div>
         </section>
 
         {/* --- Dress Code Section --- */}
-        <section className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
-          <Container className="relative z-10 text-center">
-            <div className="max-w-xl mx-auto p-10 md:p-12 rounded-[2.5rem] border-2 border-quince-gold/40 bg-quince-gold-bg/95 shadow-xl text-black">
+        <section aria-label="Código de vestimenta" className="py-20 bg-white/10 backdrop-blur-sm relative overflow-hidden">
+          <div className="relative z-10 mx-auto w-full max-w-6xl px-3 text-center">
+            <div className="max-w-xl mx-auto p-10 md:p-12 rounded-[2.5rem] border-2 border-quince-gold/40 bg-quince-gold-bg/95 shadow-xl text-quince-ink">
               <div className="flex justify-center mb-3">
                 <CrownIcon className="w-12 h-12 text-quince-rose" />
               </div>
               <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-4 text-quince-rose">Código de Vestimenta</h2>
-              <p className="font-['Playfair_Display'] italic text-3xl font-bold text-black mb-4">
+              <p className="font-['Playfair_Display'] italic text-3xl font-bold text-quince-ink mb-4">
                 Traje Formal
               </p>
               <div className="h-px w-28 bg-quince-rose/40 mx-auto mb-5" />
@@ -758,51 +991,51 @@ export default function App() {
                 ✨ Vestimenta elegante para un cuento de ensueño ✨
               </p>
             </div>
-          </Container>
+          </div>
         </section>
 
         {/* --- RSVP & Envelope / Gifts Section --- */}
-        <section className="py-20 relative overflow-hidden text-center isolate">
+        <section aria-label="Confirmación de asistencia" className="py-20 relative overflow-hidden text-center isolate">
           <div className="absolute inset-0 bg-quince-cream/70 backdrop-blur-[2px]" />
           
-          <Container className="relative z-10">
+          <div className="relative z-10 mx-auto w-full max-w-6xl px-3">
             {/* Lluvia de Sobres / Gifts Notice */}
-            <div className="mb-14 pb-12 border-b border-white/20 text-white flex flex-col items-center">
-              <Gift className="mb-3 text-quince-gold animate-bounce" size={44} />
-              <p className="uppercase tracking-[0.4em] text-xs opacity-60 mb-2 font-bold">Lluvia de Sobres</p>
+            <div className="mb-14 pb-12 border-b border-quince-deep/20 text-quince-ink flex flex-col items-center">
+              <Gift className="mb-3 text-quince-deep animate-bounce" size={44} />
+              <p className="uppercase tracking-[0.4em] text-xs opacity-80 mb-2 font-bold">Lluvia de Sobres</p>
               <p className="font-['Playfair_Display'] italic text-3xl md:text-4xl">"Tu presencia es nuestro mejor regalo"</p>
             </div>
-            
-            <h2 className="font-['Alex_Brush'] text-7xl md:text-8xl mb-4 text-quince-gold drop-shadow-lg">Confirmación de Asistencia</h2>
+
+            <h2 className="font-['Alex_Brush'] text-7xl md:text-8xl mb-4 text-quince-deep drop-shadow-lg">Confirmación de Asistencia</h2>
 
             {/* RSVP Form Component */}
             <RSVPForm />
 
             {/* Direct Contact */}
             <div className="mt-10 flex flex-col items-center">
-              <p className="text-white/80 text-sm mb-3 italic">
+              <p className="text-quince-ink/90 text-sm mb-3 italic">
                 ¿Tienes alguna inquietud o consulta sobre el evento? Comunícate con:
               </p>
-              <a 
-                href={`https://wa.me/${RSVP_PHONE}`} 
-                target="_blank" 
+              <a
+                href={`https://wa.me/${RSVP_PHONE}`}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 text-white font-bold hover:text-quince-gold transition-colors text-lg bg-white/15 px-7 py-3.5 rounded-full border border-white/30 backdrop-blur-md shadow-lg"
+                className="flex items-center gap-3 text-white font-bold text-lg bg-quince-deep hover:bg-quince-ink transition-colors px-7 py-3.5 rounded-full border border-white/40 shadow-lg"
               >
-                <Phone size={22} className="text-[#25D366]" />
+                <Phone size={22} />
                 <span>WhatsApp: {RSVP_CONTACT_NAME} (318 734 4947)</span>
               </a>
             </div>
-          </Container>
+          </div>
         </section>
 
         <MusicPlayer />
 
         {/* --- Footer --- */}
-        <footer className="py-10 text-center text-white/40 text-xs uppercase tracking-[0.4em] font-bold">
+        <footer className="py-10 text-center text-quince-ink/70 text-xs uppercase tracking-[0.4em] font-bold">
           © 2026 15 Años de Mariana Lozano Santa • La Bella Durmiente By Stiveen13
         </footer>
-      </motion.div>
+      </motion.main>
     </div>
   );
 }

@@ -1,0 +1,23 @@
+{
+  "name": "15 Años de Mariana Lozano Santa",
+  "short_name": "15 Años Mariana",
+  "description": "Invitación digital interactiva para los 15 Años de Mariana Lozano Santa (Temática La Bella Durmiente).",
+  "lang": "es",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ECA8BA",
+  "theme_color": "#ECA8BA",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "type": "image/png",
+      "sizes": "180x180"
+    }
+  ]
+}
