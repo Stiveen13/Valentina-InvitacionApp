@@ -3,6 +3,8 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Calendar,
   CalendarPlus,
+  ChevronLeft,
+  ChevronRight,
   Clock,
   Download,
   MapPin,
@@ -23,11 +25,14 @@ const RSVP_CONTACT_NAME = 'Mariana Lozano Santa';
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycby8fPPLOm8YwWQpWauBah-DaUn3Gllqw-DQLmMZbKKA2ujq9Sg-QpLh4gtZfKo1KxrhhA/exec";
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1gCsGdmQ7HW3sfSNytiWDwh1VP9zK5wmG/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Song URL
 
-// Foto servida desde public/ en lugar de hotlink a Google Drive: 324 KB en JPEG
-// frente a los 2.78 MB del PNG original, y sin depender de una URL ajena.
-const PHOTO_SRC = '/mariana.jpg';
-const PHOTO_WIDTH = 1086;
-const PHOTO_HEIGHT = 1448;
+// Fotos servidas desde public/fotos en lugar de hotlink a Google Drive: JPEG
+// comprimido (~225-325 KB c/u) frente a los ~2.5 MB de los PNG originales.
+const PHOTOS = [
+  { src: '/fotos/mariana.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
+  { src: '/fotos/foto-1.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
+  { src: '/fotos/foto-2.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
+  { src: '/fotos/foto-3.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
+];
 
 const EVENT_END_DATE = new Date('2026-09-27T03:00:00');
 const EVENT_TITLE = '15 Años de Mariana Lozano Santa';
@@ -316,6 +321,81 @@ const CountdownTimer = () => {
       <TimeUnit value={timeLeft.hours} label="Horas" />
       <TimeUnit value={timeLeft.minutes} label="Min" />
       <TimeUnit value={timeLeft.seconds} label="Seg" />
+    </div>
+  );
+};
+
+const PhotoCarousel = () => {
+  const [index, setIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const goTo = (i: number) => setIndex(((i % PHOTOS.length) + PHOTOS.length) % PHOTOS.length);
+  const goNext = () => goTo(index + 1);
+  const goPrev = () => goTo(index - 1);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setIndex(i => (i + 1) % PHOTOS.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [index, isPaused]);
+
+  const photo = PHOTOS[index];
+
+  return (
+    <div
+      className="relative h-full w-full"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={photo.src}
+          src={photo.src}
+          width={photo.width}
+          height={photo.height}
+          alt={photo.alt}
+          loading="lazy"
+          decoding="async"
+          initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 1.03 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.6, ease: 'easeInOut' }}
+          className="w-full h-full object-cover opacity-90"
+          style={{ filter: "contrast(1.05) saturate(1.1)" }}
+        />
+      </AnimatePresence>
+
+      <button
+        type="button"
+        aria-label="Foto anterior"
+        onClick={goPrev}
+        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full bg-white/70 backdrop-blur-sm border border-white/60 text-quince-deep shadow-md hover:bg-white/90 transition-colors"
+      >
+        <ChevronLeft size={22} />
+      </button>
+      <button
+        type="button"
+        aria-label="Foto siguiente"
+        onClick={goNext}
+        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-full bg-white/70 backdrop-blur-sm border border-white/60 text-quince-deep shadow-md hover:bg-white/90 transition-colors"
+      >
+        <ChevronRight size={22} />
+      </button>
+
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+        {PHOTOS.map((p, i) => (
+          <button
+            key={p.src}
+            type="button"
+            aria-label={`Ir a la foto ${i + 1}`}
+            onClick={() => goTo(i)}
+            className={`h-2 rounded-full transition-all ${i === index ? 'w-6 bg-white' : 'w-2 bg-white/60'}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -831,16 +911,7 @@ export default function App() {
 
                 <div className="relative h-full w-full p-2 md:p-4">
                   <div className="relative h-full w-full card-photo-frame border-8 border-white shadow-2xl rounded-2xl overflow-hidden bg-quince-blush">
-                    <img
-                      src={PHOTO_SRC}
-                      width={PHOTO_WIDTH}
-                      height={PHOTO_HEIGHT}
-                      alt="Mariana Lozano Santa"
-                      loading="lazy"
-                      decoding="async"
-                      className="w-full h-full object-cover opacity-90"
-                      style={{ filter: "contrast(1.05) saturate(1.1)" }}
-                    />
+                    <PhotoCarousel />
                   </div>
                 </div>
 

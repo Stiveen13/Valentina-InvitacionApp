@@ -32,16 +32,17 @@ The entire application lives in **`src/App.tsx`** (~800 lines) as one file with 
 - `CountdownTimer` — computes time remaining until `EVENT_DATE` (top-of-file constant) client-side with `setInterval`, no server sync.
 - `MusicPlayer` — floating play/pause button controlling a background `<audio>` element sourced from `MUSIC_URL` (a Google Drive direct-media link). Autoplays once the invitation envelope is opened, via a custom `invitationOpened` window event.
 - `RSVPForm` — collects name/attendance/party size, POSTs to `SHEETS_URL` (a Google Apps Script Web App, `mode: "no-cors"` so the response is opaque) to append a row to a Google Sheet, then redirects to a `wa.me` WhatsApp deep link pre-filled with the same info as a fallback/notification channel. This dual-write (Sheets + WhatsApp) is the actual "backend."
-- `App` — top-level state machine for the envelope-opening intro animation (`isOpening` → `isOpened`, gated by a `setTimeout`), then renders the page sections in order: hero/countdown, photo carousel (`react-bootstrap` `Carousel`), event details cards, embedded Google Maps iframe, dress code, RSVP + WhatsApp contact, footer.
+- `PhotoCarousel` — self-built carousel (no library; `react-bootstrap` was removed as dead weight) over the `PHOTOS` array, using `framer-motion`'s `AnimatePresence` for a crossfade. Auto-advances every 3s via `setInterval`, pausing on mouse hover; prev/next buttons and dot indicators navigate manually with wraparound. Respects `useReducedMotion` to skip the animation.
+- `App` — top-level state machine for the envelope-opening intro animation (`isOpening` → `isOpened`, gated by a `setTimeout`), then renders the page sections in order: hero/countdown, photo carousel, event details cards, embedded Google Maps iframe, dress code, RSVP + WhatsApp contact, footer.
 
 Key top-of-file constants control event content and integrations — update these rather than hunting through JSX when the date, venue, contact number, RSVP endpoint, or music track changes:
 ```
 EVENT_DATE, RSVP_PHONE, RSVP_CONTACT_NAME, SHEETS_URL, MUSIC_URL
 ```
-Photo carousel images and the Google Maps query string are inline in the JSX (search for `lh3.googleusercontent.com` and `maps.google.com/maps?q=`) rather than extracted as constants — check both places when swapping the venue or photos.
+Photo carousel images come from the `PHOTOS` array (top of `src/App.tsx`), each pointing at a JPEG in `public/fotos/` (`mariana.jpg`, `foto-1.jpg`, `foto-2.jpg`, `foto-3.jpg` — kept small, a few hundred KB each; avoid dropping in unoptimized multi-MB PNGs). The Google Maps query string is inline in the JSX (search for `maps.google.com/maps?q=`) rather than a constant — check both places when swapping the venue or photos.
 
 ## Styling
 
-Tailwind CSS v4 via `@tailwindcss/vite` (config lives in `src/index.css` `@theme` block, not a `tailwind.config.js`). Custom theme colors are prefixed `quince-*` (`quince-rose`, `quince-blush`, `quince-gold`, etc.) — reuse these tokens instead of introducing new hex values inline. `react-bootstrap` is used only for `Carousel`/`Container`/`Row`/`Col`/`Button` layout primitives, not its default visual styling (Bootstrap's CSS is linked in `index.html` mainly for the carousel/grid mechanics, with Tailwind classes overriding appearance).
+Tailwind CSS v4 via `@tailwindcss/vite` (config lives in `src/index.css` `@theme` block, not a `tailwind.config.js`). Custom theme colors are prefixed `quince-*` (`quince-rose`, `quince-blush`, `quince-gold`, etc.) — reuse these tokens instead of introducing new hex values inline.
 
 Path alias `@/*` → project root (configured in both `tsconfig.json` and `vite.config.ts`).
