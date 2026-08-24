@@ -19,26 +19,26 @@ import {
 } from 'lucide-react';
 
 // --- Constants ---
-const EVENT_DATE = new Date('2026-09-26T20:00:00');
+const EVENT_DATE = new Date('2026-10-10T20:00:00');
 const RSVP_PHONE = '573187344947';
-const RSVP_CONTACT_NAME = 'Mariana Lozano Santa';
-const SHEETS_URL = "https://script.google.com/macros/s/AKfycby8fPPLOm8YwWQpWauBah-DaUn3Gllqw-DQLmMZbKKA2ujq9Sg-QpLh4gtZfKo1KxrhhA/exec";
-const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1gCsGdmQ7HW3sfSNytiWDwh1VP9zK5wmG/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Song URL
+const RSVP_CONTACT_NAME = 'Valentina Montoya Henao ';
+const SHEETS_URL = "https://script.google.com/macros/s/AKfycbz13gzhWlyF5JbfpKTJl1sa6wd5RjmkqHuPlKZegXofMDQ2GmhX-VgOD6mG10vQX30l/exec";
+const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1A_pUpmyZyqNV2_S6yq5f3Rg8xjGMavqA/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Song URL
 
 // Fotos servidas desde public/fotos en lugar de hotlink a Google Drive: JPEG
 // comprimido (~225-325 KB c/u) frente a los ~2.5 MB de los PNG originales.
 const PHOTOS = [
-  { src: '/fotos/mariana.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
-  { src: '/fotos/foto-1.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
-  { src: '/fotos/foto-2.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
-  { src: '/fotos/foto-3.jpg', alt: 'Mariana Lozano Santa', width: 1086, height: 1448 },
+  { src: '/fotos/Foto-4.png', alt: 'valentina montoya henao ', width: 1086, height: 1448 },
+  { src: '/fotos/Foto-1.png', alt: 'valentina montoya henao ', width: 1086, height: 1448 },
+  { src: '/fotos/Foto-2.png', alt: 'valentina montoya henao ', width: 1086, height: 1448 },
+  { src: '/fotos/Foto-3.png', alt: 'Valentina Montoya Henao ', width: 1086, height: 1448 },
 ];
 
-const EVENT_END_DATE = new Date('2026-09-27T03:00:00');
-const EVENT_TITLE = '15 Años de Mariana Lozano Santa';
-const EVENT_LOCATION = 'Finca La Caleñita (Restaurante Cortesana), Tuluá, Corregimiento de Nariño';
-const EVENT_DETAILS = 'Celebración de los 15 años de Mariana Lozano Santa. Traje formal. Puntualidad: 8:00 P.M.';
-const MAPS_QUERY = 'Finca La Caleñita Restaurante Cortesana Tulua';
+const EVENT_END_DATE = new Date('2026-10-11T03:00:00');
+const EVENT_TITLE = '15 Años de Valentina Montoya Henao ';
+const EVENT_LOCATION = 'Vereda Belén';
+const EVENT_DETAILS = 'Celebración de los 15 años de Valentina Montoya Henao  Traje formal. Puntualidad: 8:00 P.M.';
+const MAPS_QUERY = 'Belén,San Pedro Valle';
 
 // --- Helpers ---
 
@@ -883,7 +883,7 @@ export default function App() {
                    transition={{ delay: 0.4 }}
                    className="font-['Playfair_Display'] italic text-3xl md:text-5xl text-quince-deep font-black tracking-wide drop-shadow-sm"
                  >
-                   Mariana Lozano Santa
+                   Valentina Montoya Henao 
                  </motion.h2>
                  <div className="h-px w-12 md:w-20 bg-quince-deep/50" />
               </div>
@@ -891,9 +891,10 @@ export default function App() {
 
               <div className="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-2xl border border-quince-rose/20 shadow-inner mb-6 text-center">
                 <p className="font-['Playfair_Display'] italic text-lg md:text-xl text-quince-ink/90 leading-relaxed">
-                  "Con gran alegría quiero invitarte a celebrar conmigo un día muy especial: mis 15 años.
+                  Quiero compartir contigo la magia de mis 15 años. 
                   <br /><br />
-                  Será una noche llena de emociones, sueños, música y momentos inolvidables. Tu compañía hará que esta fecha sea aún más especial para mí. Espero contar con tu presencia para compartir juntos esta hermosa celebración."
+                  Tu presencia hará que este día sea aún más especial.
+                  Hay momentos que se quedan para siempre en el corazón, y quiero vivir este junto a ti. Acompáñame a celebrar mis 15 años.
                 </p>
               </div>
 
@@ -943,7 +944,7 @@ export default function App() {
                   </div>
                   <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-ink">Fecha</h3>
                   <p className="text-quince-deep uppercase tracking-widest text-xs font-bold">Sábado</p>
-                  <p className="text-2xl font-bold text-quince-ink mt-1">26 de Septiembre</p>
+                  <p className="text-2xl font-bold text-quince-ink mt-1">10 de Octubre</p>
                 </motion.div>
               </div>
 
@@ -970,9 +971,9 @@ export default function App() {
                     <MapPin size={28} />
                   </div>
                   <h3 className="font-['Playfair_Display'] text-xl font-bold mb-2 text-quince-ink">Lugar</h3>
-                  <p className="text-quince-deep uppercase tracking-widest text-xs font-bold">Finca La Caleñita</p>
-                  <p className="text-lg font-bold text-quince-ink mt-0.5">(Restaurante Cortesana)</p>
-                  <p className="text-sm text-quince-ink/90 mt-1">Tuluá, Corregimiento de Nariño</p>
+                  <p className="text-quince-deep uppercase tracking-widest text-xs font-bold">Finca Buganviles</p>
+                  <p className="text-lg font-bold text-quince-ink mt-0.5">(Belén)</p>
+                  <p className="text-sm text-quince-ink/90 mt-1">San Pedro, Vereda Belén</p>
                 </motion.div>
               </div>
             </div>
@@ -1007,12 +1008,12 @@ export default function App() {
             <div className="text-center mb-10">
               <h2 className="font-['Playfair_Display'] text-4xl font-bold mb-3 text-quince-ink">¿Cómo llegar?</h2>
               <p className="text-quince-deep font-bold uppercase tracking-widest text-xs">
-                Finca La Caleñita (Restaurante Cortesana) • Tuluá, Corregimiento de Nariño
+                Vereda belén, San Pedro Valle
               </p>
             </div>
             <div className="rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white/80 h-[420px] relative">
               <iframe
-                src="https://maps.google.com/maps?q=Finca+La+Cale%C3%B1ita+Restaurante+Cortesana+Tulua&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d1505.8780558614194!2d-76.21781538507233!3d4.00165777053762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1ses!2sco!4v1787586560593!5m2!1ses!2sco"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
@@ -1104,7 +1105,7 @@ export default function App() {
 
         {/* --- Footer --- */}
         <footer className="py-10 text-center text-quince-ink/70 text-xs uppercase tracking-[0.4em] font-bold">
-          © 2026 15 Años de Mariana Lozano Santa • La Bella Durmiente By Stiveen13
+          © 2026 15 Años de Valentina Montoya Henao  • La Bella Durmiente By Stiveen13
         </footer>
       </motion.main>
     </div>
