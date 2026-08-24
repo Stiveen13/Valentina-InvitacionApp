@@ -1067,7 +1067,7 @@ export default function App() {
         </section>
 
         {/* --- RSVP & Envelope / Gifts Section --- */}
-        <section aria-label="Contamos con tu asistencia" className="py-20 relative overflow-hidden text-center isolate">
+        <section aria-label="Contamos con tu asitencia" className="py-20 relative overflow-hidden text-center isolate">
           <div className="absolute inset-0 bg-quince-cream/70 backdrop-blur-[2px]" />
           
           <div className="relative z-10 mx-auto w-full max-w-6xl px-3">
@@ -1078,7 +1078,7 @@ export default function App() {
               <p className="font-['Playfair_Display'] italic text-3xl md:text-4xl">"Tu presencia es nuestro mejor regalo"</p>
             </div>
 
-            <h2 className="font-['Alex_Brush'] text-7xl md:text-8xl mb-4 text-quince-deep drop-shadow-lg">Confirmación de Asistencia</h2>
+            <h2 className="font-['Alex_Brush'] text-7xl md:text-8xl mb-4 text-quince-deep drop-shadow-lg">Contamos con tu Asistencia</h2>
 
             
             
