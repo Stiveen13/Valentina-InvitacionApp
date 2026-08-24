@@ -20,8 +20,8 @@ import {
 
 // --- Constants ---
 const EVENT_DATE = new Date('2026-10-10T20:00:00');
-const RSVP_PHONE = '573187344947';
-const RSVP_CONTACT_NAME = 'Valentina Montoya Henao ';
+const RSVP_PHONE = '';
+const RSVP_CONTACT_NAME = 'Johanna Henao ';
 const SHEETS_URL = "https://script.google.com/macros/s/AKfycbz13gzhWlyF5JbfpKTJl1sa6wd5RjmkqHuPlKZegXofMDQ2GmhX-VgOD6mG10vQX30l/exec";
 const MUSIC_URL = 'https://www.googleapis.com/drive/v3/files/1A_pUpmyZyqNV2_S6yq5f3Rg8xjGMavqA/?alt=media&key=AIzaSyANTOMhIHUFCjz1OWcz0oDa4Yah5WWMYvE'; // Song URL
 
@@ -38,7 +38,7 @@ const EVENT_END_DATE = new Date('2026-10-11T03:00:00');
 const EVENT_TITLE = '15 Años de Valentina Montoya Henao ';
 const EVENT_LOCATION = 'Vereda Belén';
 const EVENT_DETAILS = 'Celebración de los 15 años de Valentina Montoya Henao  Traje formal. Puntualidad: 8:00 P.M.';
-const MAPS_QUERY = 'Belén,San Pedro Valle';
+const MAPS_QUERY = 'Avícola buganviles';
 
 // --- Helpers ---
 
@@ -88,9 +88,9 @@ const downloadIcs = () => {
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//15 Anos Mariana//ES',
+    'PRODID:-//15 Valentina//ES',
     'BEGIN:VEVENT',
-    `UID:${toCalendarStamp(EVENT_DATE)}-mariana-15@invitacion`,
+    `UID:${toCalendarStamp(EVENT_DATE)}-valentina-15@invitacion`,
     `DTSTAMP:${toCalendarStamp(new Date())}`,
     `DTSTART:${toCalendarStamp(EVENT_DATE)}`,
     `DTEND:${toCalendarStamp(EVENT_END_DATE)}`,
@@ -104,7 +104,7 @@ const downloadIcs = () => {
   const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar;charset=utf-8' }));
   const link = document.createElement('a');
   link.href = url;
-  link.download = '15-anos-mariana.ics';
+  link.download = '15-anos-valentina.ics';
   link.click();
   URL.revokeObjectURL(url);
 };
@@ -513,7 +513,7 @@ const RSVPForm = () => {
     setIsSending(true);
     setStatus("Enviando...");
 
-    const mensaje = ` Confirmación de asistencia (15 Años de Mariana):
+    const mensaje = ` Confirmación de asistencia (15 Años de    Valentina):
 Nombre: ${nombre}
 Asistencia: ${asistira}
 Número de personas: ${numero}`;
@@ -547,7 +547,7 @@ Número de personas: ${numero}`;
           <span className="text-4xl">✅</span>
         </div>
         <h3 className="font-['Playfair_Display'] text-2xl font-bold mb-2 text-quince-ink">¡Gracias por confirmar!</h3>
-        <p className="text-quince-ink/90 italic mb-6">Tu respuesta ha sido registrada. ¡Mariana te espera para celebrar juntos!</p>
+        <p className="text-quince-ink/90 italic mb-6">Tu respuesta ha sido registrada. ¡Valentina te espera para celebrar juntos!</p>
         <a
           href={waUrl}
           target="_blank"
@@ -793,7 +793,7 @@ export default function App() {
                     className="absolute inset-x-4 bottom-4 top-8 bg-white/95 shadow-inner p-4 flex flex-col items-center justify-center border-2 border-quince-gold rounded-t-lg"
                   >
                     <CrownIcon className="text-quince-rose mb-2 w-10 h-10 animate-pulse" />
-                    <p className="font-['Alex_Brush'] text-2xl text-quince-rose">Mariana</p>
+                    <p className="font-['Alex_Brush'] text-2xl text-quince-rose">Valentina</p>
                     <p className="font-['Playfair_Display'] text-xs text-quince-rose/80 uppercase tracking-widest font-bold">15 Años</p>
                   </motion.div>
 
@@ -1080,10 +1080,14 @@ export default function App() {
 
             <h2 className="font-['Alex_Brush'] text-7xl md:text-8xl mb-4 text-quince-deep drop-shadow-lg">Confirmación de Asistencia</h2>
 
-            {/* RSVP Form Component */}
+            
+            
+            {/*
+        
+            //RSVP Form Component// 
             <RSVPForm />
 
-            {/* Direct Contact */}
+             //Direct Contact //
             <div className="mt-10 flex flex-col items-center">
               <p className="text-quince-ink/90 text-sm mb-3 italic">
                 ¿Tienes alguna inquietud o consulta sobre el evento? Comunícate con:
@@ -1098,8 +1102,11 @@ export default function App() {
                 <span>WhatsApp: {RSVP_CONTACT_NAME} (318 734 4947)</span>
               </a>
             </div>
+            */}
+
           </div>
         </section>
+        
 
         <MusicPlayer />
 
