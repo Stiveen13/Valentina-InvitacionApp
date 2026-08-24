@@ -1067,7 +1067,7 @@ export default function App() {
         </section>
 
         {/* --- RSVP & Envelope / Gifts Section --- */}
-        <section aria-label="Confirmación de asistencia" className="py-20 relative overflow-hidden text-center isolate">
+        <section aria-label="Contamos con tu asistencia" className="py-20 relative overflow-hidden text-center isolate">
           <div className="absolute inset-0 bg-quince-cream/70 backdrop-blur-[2px]" />
           
           <div className="relative z-10 mx-auto w-full max-w-6xl px-3">
